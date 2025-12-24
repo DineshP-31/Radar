@@ -1,0 +1,10 @@
+package com.dp.radar.com.dp.radar.domain.login
+
+import com.dp.radar.com.dp.radar.domain.repositories.ILoginRepository
+import javax.inject.Inject
+
+class SaveUserIdUseCase @Inject constructor(
+    private val repository: ILoginRepository
+) {
+    operator fun invoke(userId: Long) = repository.saveUserId(userId)
+}
