@@ -110,7 +110,10 @@ fun LocationFetchScreen(
 
     LaunchedEffect(signUpState.user) {
         signUpState.user?.let {
-            radarViewModel.onBoardingCompleted(userId = it.id)
+            with(radarViewModel){
+                onLoginSuccess(email)
+                onBoardingCompleted(userId = it.id)
+            }
             goToSuccessScreen()
         }
     }
