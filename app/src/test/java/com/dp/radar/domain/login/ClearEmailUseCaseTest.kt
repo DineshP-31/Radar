@@ -1,0 +1,37 @@
+package com.dp.radar.domain.login
+
+import com.dp.radar.com.dp.radar.domain.login.ClearEmailUseCase
+import com.dp.radar.com.dp.radar.domain.repositories.ILoginRepository
+import org.junit.Before
+import org.mockito.Mock
+import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.times
+import org.mockito.kotlin.verify
+import kotlin.test.Test
+
+class ClearEmailUseCaseTest {
+    @Mock
+    private lateinit var loginRepository: ILoginRepository
+    private lateinit var clearEmailUseCase: ClearEmailUseCase
+
+    @Before
+    fun setup() {
+        MockitoAnnotations.openMocks(this)
+        clearEmailUseCase = ClearEmailUseCase(
+            loginRepository
+        )
+    }
+
+    @Test
+    fun `invoke should call repository_clearEmail exactly once`() {
+        // ACT
+        // Call the Use Case using the 'invoke' operator function
+        clearEmailUseCase()
+
+        // ASSERT
+        // Verify that the clearEmail method on the mock repository was called
+        // exactly one time.
+        verify(loginRepository, times(1)).clearEmail()
+    }
+
+}
