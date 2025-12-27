@@ -14,7 +14,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.dp.radar.R
-import com.dp.radar.com.dp.radar.ui.composable.LocationFetchScreen
+import com.dp.radar.com.dp.radar.ui.composable.LocationFetchRoute
 import com.dp.radar.ui.composable.login.LoginScreen
 import com.dp.radar.ui.composable.login.LoginSuccessScreen
 import com.dp.radar.ui.navigation.RadarScreen
@@ -61,7 +61,7 @@ fun LoginFlow(radarViewModel: RadarViewModel) {
 
             composable<RadarScreen.LocationFetchScreen> { backStackEntry ->
                 val route = backStackEntry.toRoute<RadarScreen.LocationFetchScreen>()
-                LocationFetchScreen(
+                LocationFetchRoute(
                     username = route.name,
                     email = route.email,
                     goToSuccessScreen = {
