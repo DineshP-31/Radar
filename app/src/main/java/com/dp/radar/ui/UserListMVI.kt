@@ -13,7 +13,7 @@ data class UserListState(
     val error: String? = null
 ) {
     companion object {
-        val Initial = UserListState(isLoading = true)
+        val Initial = UserListState(isLoading = false)
     }
 }
 

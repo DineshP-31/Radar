@@ -71,6 +71,10 @@ android {
         compose = true
     }
 
+    testOptions {
+        unitTests.isReturnDefaultValues = true
+    }
+
     packaging {
         resources {
             excludes.add("META-INF/gradle/incremental.annotation.processors")

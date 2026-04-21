@@ -1,6 +1,5 @@
 package com.dp.radar.ui.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dp.radar.com.dp.radar.domain.ApiResult
@@ -32,7 +31,6 @@ class UserListViewModel @Inject constructor(
     val chats: StateFlow<List<Chat>> = _chats
 
     init {
-        Log.e("Init:", "Called")
         handleIntent(UserListIntent.LoadUsers)
     }
 

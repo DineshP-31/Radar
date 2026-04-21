@@ -1,77 +1,57 @@
-import com.dp.radar.domain.GetUsersUseCase
+package com.dp.radar.domain
+
+import com.dp.radar.com.dp.radar.domain.ApiResult
 import com.dp.radar.com.dp.radar.domain.model.User
 import com.dp.radar.com.dp.radar.domain.repositories.UserRepository
+import com.dp.radar.data.datasources.remote.dto.LatLong
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
-import org.mockito.Mockito.mock
-import org.mockito.Mockito.`when`
-import org.mockito.Mockito.verify
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class GetUsersUseCaseTest {
 
-    // Mock the Use Case's dependency
     private lateinit var mockRepository: UserRepository
-
-    // The Use Case instance to be tested
     private lateinit var getUsersUseCase: GetUsersUseCase
 
     @Before
     fun setup() {
-        mockRepository = mock(UserRepository::class.java)
+        mockRepository = mock()
         getUsersUseCase = GetUsersUseCase(mockRepository)
     }
 
-    // --- Scenario 1: Successful Data Fetch ---
     @Test
     fun `invoke should return success result when repository call succeeds`() = runTest {
-        // ARRANGE
         val expectedUsers = listOf(
-            User(
-                1, "Alice", "alice@test.com", "Main St, City",
-                cityAndStreet = ""
-            ),
-            User(
-                2, "Bob", "bob@test.com", "Second Ave, Town",
-                cityAndStreet = ""
-            )
+            User(1L, "Alice", "alice@test.com", latLong = LatLong(0.0, 0.0)),
+            User(2L, "Bob", "bob@test.com", latLong = LatLong(0.0, 0.0))
         )
 
-        // Stub the repository to return a successful Result
-        `when`(mockRepository.getUsers()).thenReturn(Result.success(expectedUsers))
+        whenever(mockRepository.getUsers()).thenReturn(ApiResult.Success(expectedUsers))
 
-        // ACT
         val result = getUsersUseCase()
 
-        // ASSERT
-        // 1. Verify the repository method was called
         verify(mockRepository).getUsers()
 
-        // 2. Verify the result is a success and contains the correct data
-        assertTrue(result.isSuccess)
-        assertEquals(expectedUsers, result.getOrNull())
+        assertTrue(result is ApiResult.Success)
+        assertEquals(expectedUsers, result.data)
     }
 
-    // --- Scenario 2: Data Fetch Failure ---
     @Test
     fun `invoke should return failure result when repository call fails`() = runTest {
-        // ARRANGE
-        val expectedException = RuntimeException("Network timeout")
+        val errorMessage = "Network timeout"
 
-        // Stub the repository to return a failed Result
-        `when`(mockRepository.getUsers()).thenReturn(Result.failure(expectedException))
+        whenever(mockRepository.getUsers()).thenReturn(ApiResult.Error(errorMessage))
 
-        // ACT
         val result = getUsersUseCase()
 
-        // ASSERT
-        // 1. Verify the repository method was called
         verify(mockRepository).getUsers()
 
-        // 2. Verify the result is a failure and contains the correct exception
-        assertTrue(result.isFailure)
-        assertEquals(expectedException.message, result.exceptionOrNull()?.message)
+        assertTrue(result is ApiResult.Error)
+        assertEquals(errorMessage, result.message)
     }
 }
