@@ -23,15 +23,15 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
-    flavorDimensions += "env"
-
     buildTypes {
         debug {
             isDebuggable = true
+            buildConfigField("String", "BASE_URL", "\"http://10.0.2.2:8080/api/\"")
         }
 
         release {
             isMinifyEnabled = false
+            buildConfigField("String", "BASE_URL", "\"http://13.49.114.84:8080/api/\"")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -42,20 +42,6 @@ android {
     buildFeatures {
         compose = true
         buildConfig = true
-    }
-
-    productFlavors {
-        create("mock") {
-            dimension = "env"
-
-            buildConfigField("String", "BASE_URL", "\"http://10.0.2.2:8080/api/\"")
-        }
-
-        create("prod") {
-            dimension = "env"
-
-            buildConfigField("String", "BASE_URL", "\"http://13.49.114.84:8080/api/\"")
-        }
     }
 
 
