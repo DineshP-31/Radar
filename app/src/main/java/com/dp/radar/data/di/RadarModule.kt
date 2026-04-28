@@ -6,12 +6,9 @@ import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
 import com.dp.radar.data.AndroidNetworkMonitor
 import com.dp.radar.data.NetworkMonitor
-import com.dp.radar.data.datasources.remote.RadarApiService
 import com.dp.radar.data.repositories.DefaultLocationRepository
-import com.dp.radar.data.repositories.DefaultUserRepository
 import com.dp.radar.domain.repositories.ILoginRepository
 import com.dp.radar.domain.repositories.LocationRepository
-import com.dp.radar.domain.repositories.UserRepository
 import com.dp.radar.data.repositories.ChatRepository
 import com.dp.radar.data.repositories.login.LoginRepository
 import dagger.Module
@@ -44,12 +41,6 @@ object RadarModule {
     @Provides
     fun provideNetworkStatus(@ApplicationContext context: Context): NetworkMonitor {
         return AndroidNetworkMonitor(context)
-    }
-
-    @Provides
-    @Singleton
-    fun providesUserRepository(radarApiService: RadarApiService, networkMonitor: NetworkMonitor): UserRepository {
-        return DefaultUserRepository(radarApiService, networkMonitor)
     }
 
     @Provides

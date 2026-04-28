@@ -11,6 +11,7 @@ A real-time, location-based social messaging app for Android. Radar lets users d
 - [Tech Stack](#tech-stack)
 - [Project Structure](#project-structure)
 - [Screens](#screens)
+- [How to Use](#how-to-use)
 - [Data Flow](#data-flow)
 - [Build & Run](#build--run)
 - [Testing](#testing)
@@ -26,7 +27,7 @@ A real-time, location-based social messaging app for Android. Radar lets users d
 - **Instant Messaging** — bidirectional chat backed by Firebase Realtime Database with sent/received message bubbles
 - **Session Persistence** — login state survives app restarts via Jetpack DataStore Preferences, exposed as a reactive `Flow<Boolean>`
 - **Skeleton Loaders & Error States** — polished loading/error/empty UI throughout
-- **Mock & Prod Flavors** — swap between a local development server and a production AWS server at build time
+- **Build Flavors** — swap between a REST API backend (`api`) and Firebase Realtime Database (`firebase`) at build time with zero code changes
 
 ---
 
@@ -68,7 +69,8 @@ Pure Kotlin — no Android dependencies. Defines:
 
 ### Data
 
-- **`DefaultUserRepository`** — wraps `RadarApiService` (Retrofit), checks network availability before calls
+- **`DefaultUserRepository`** *(api flavor)* — wraps `RadarApiService` (Retrofit), checks network availability before calls
+- **`FirebaseUserRepository`** *(firebase flavor)* — reads/writes users directly to Firebase Realtime Database under `/users/{id}` using `suspendCancellableCoroutine`
 - **`ChatRepository`** — wraps Firebase Realtime Database, exposes a `Flow<List<Message>>`
 - **`DefaultLocationRepository`** — wraps `FusedLocationProviderClient` via `suspendCancellableCoroutine`
 - **`LoginRepository`** — reads/writes auth state to `DataStore<Preferences>`; reads are exposed as `Flow<Boolean>` / `Flow<Long>` so all consumers react automatically to state changes
@@ -105,23 +107,35 @@ Pure Kotlin — no Android dependencies. Defines:
 ## Project Structure
 
 ```
-app/src/main/java/com/dp/radar/
+app/src/
 │
-├── data/
-│   ├── datasources/remote/
-│   │   ├── RadarApiService.kt          # Retrofit interface — all API endpoints
-│   │   └── dto/
-│   │       ├── UserDto.kt              # API response DTO with toDomain() mapper
-│   │       └── LatLong.kt              # GPS coordinates {lat, lon}
-│   ├── repositories/
-│   │   ├── DefaultUserRepository.kt    # Implements UserRepository via Retrofit
-│   │   ├── DefaultLocationRepository.kt# Implements LocationRepository via FusedLocation
-│   │   ├── ChatRepository.kt           # Firebase Realtime Database adapter
-│   │   └── login/LoginRepository.kt    # Auth state (DataStore<Preferences>)
-│   ├── di/
-│   │   ├── NetworkModule.kt            # Hilt: Retrofit, OkHttp, Moshi, base URL
-│   │   └── RadarModule.kt              # Hilt: repositories, DataStore, dispatcher
-│   └── NetworkMonitor.kt               # Connectivity check before API calls
+├── main/java/com/dp/radar/             # Shared across all flavors
+│   ├── data/
+│   │   ├── datasources/remote/
+│   │   │   ├── RadarApiService.kt          # Retrofit interface — all API endpoints
+│   │   │   └── dto/
+│   │   │       ├── UserDto.kt              # API response DTO with toDomain() mapper
+│   │   │       └── LatLong.kt              # GPS coordinates {lat, lon}
+│   │   ├── repositories/
+│   │   │   ├── DefaultUserRepository.kt    # UserRepository via Retrofit (api flavor)
+│   │   │   ├── DefaultLocationRepository.kt# LocationRepository via FusedLocation
+│   │   │   ├── ChatRepository.kt           # Firebase Realtime Database adapter
+│   │   │   └── login/LoginRepository.kt    # Auth state (DataStore<Preferences>)
+│   │   ├── di/
+│   │   │   ├── NetworkModule.kt            # Hilt: Retrofit, OkHttp, Moshi, base URL
+│   │   │   └── RadarModule.kt              # Hilt: shared bindings — DataStore, dispatcher, location
+│   │   └── NetworkMonitor.kt               # Connectivity check before API calls
+│
+├── api/java/com/dp/radar/              # api flavor only
+│   └── data/di/
+│       └── UserRepositoryModule.kt         # Hilt: binds DefaultUserRepository
+│
+└── firebase/java/com/dp/radar/         # firebase flavor only
+    └── data/
+        ├── repositories/
+        │   └── FirebaseUserRepository.kt   # UserRepository via Firebase Realtime Database
+        └── di/
+            └── UserRepositoryModule.kt     # Hilt: provides FirebaseDatabase + FirebaseUserRepository
 │
 ├── domain/
 │   ├── model/
@@ -214,19 +228,68 @@ Placeholder — not yet implemented.
 
 ---
 
+## How to Use
+
+> **Recommended for testing:** use the `firebaseDebug` build variant. It requires no local server — user profiles and messages are stored directly in Firebase Realtime Database. Switch to it in Android Studio via **View → Tool Windows → Build Variants → `firebaseDebug`**, then run `./gradlew :app:installFirebaseDebug`.
+
+### End-to-End: Real-Time Chat Between Two Devices
+
+> Both devices must have an internet connection. Install the **`firebaseDebug`** variant on each.
+
+**Set up Device A (Alice)**
+
+1. Install and open the app.
+2. Tap **Sign in with Google** and choose a Gmail account (e.g. `alice@gmail.com`).
+3. Grant the location permission when prompted — the app captures GPS coordinates to register your profile.
+4. Your profile is created in Firebase under `/users`. You land on the **Home** screen.
+
+**Set up Device B (Bob)**
+
+1. Install and open the app on a second device (or emulator).
+2. Tap **Sign in with Google** and choose a **different** Gmail account (e.g. `bob@gmail.com`).
+3. Grant the location permission.
+4. Bob's profile is created in Firebase. The **Home** screen loads and shows Alice's card.
+
+**Start chatting**
+
+1. On Device B, tap Alice's card — the **Chat Detail** screen opens.
+2. Type a message and send it — it appears on the right (sent bubble).
+3. On Device A, tap Bob's card — the **Chat Detail** screen opens. Bob's message appears on the left in real time, with no refresh needed.
+4. Reply from Device A — the message appears instantly on Device B.
+
+> Messages are stored in Firebase Realtime Database at `chats/{senderId}_{receiverId}/messages/{messageId}` and pushed to both devices via a persistent `ValueEventListener`.
+
+---
+
 ## Data Flow
 
 ### Fetch Users (Home Screen)
 
+The data source is determined by the build flavor — the `UserRepository` interface is the same in both cases.
+
+**`api` flavor:**
 ```
 HomeScreen
   └─ collectAsState(UserListState)
        └─ UserListViewModel.handleIntent(LoadUsers)
             └─ loadUsers() [viewModelScope + IO dispatcher]
                  └─ GetUsersUseCase()
-                      └─ UserRepository.getUsers()
+                      └─ DefaultUserRepository.getUsers()
                            └─ RadarApiService.getUsers()  [Retrofit → REST API]
                                 → ApiResult.Success(users)
+                 └─ _state.update { copy(users = filtered, isLoading = false) }
+```
+
+**`firebase` flavor:**
+```
+HomeScreen
+  └─ collectAsState(UserListState)
+       └─ UserListViewModel.handleIntent(LoadUsers)
+            └─ loadUsers() [viewModelScope + IO dispatcher]
+                 └─ GetUsersUseCase()
+                      └─ FirebaseUserRepository.getUsers()
+                           └─ FirebaseDatabase.getReference("users")
+                                → ValueEventListener.onDataChange → ApiResult.Success(users)
                  └─ _state.update { copy(users = filtered, isLoading = false) }
 ```
 
@@ -278,30 +341,43 @@ Logout
 - Android SDK platform 35
 - A physical device or emulator running API 24+
 - `google-services.json` placed in `app/` (obtain from Firebase Console)
-- For the **mock** flavor: a local server running on `http://10.0.2.2:8080/api/`
+- For the **api** flavor: a running backend server (local or AWS)
 
 ### Build Flavors
 
-| Flavor | Base URL | Use |
+The app has two flavor dimensions: **backend** (data source) × **build type** (debug/release).
+
+| Flavor | Backend | User Data Source |
 |---|---|---|
-| `mock` | `http://10.0.2.2:8080/api/` | Local development (Android emulator → host machine) |
-| `prod` | `http://13.49.114.84:8080/api/` | Production AWS server |
+| `api` | REST API via Retrofit | `DefaultUserRepository` → `RadarApiService` |
+| `firebase` | Firebase Realtime Database | `FirebaseUserRepository` → `/users/{id}` |
+
+The `BASE_URL` (set per build type) is used by the `api` flavor. The `firebase` flavor ignores it for user operations.
+
+| Build Type | `BASE_URL` |
+|---|---|
+| `debug` | `http://10.0.2.2:8080/api/` (emulator → localhost) |
+| `release` | `http://13.49.114.84:8080/api/` (AWS) |
 
 ### Build Commands
 
 ```bash
 # Assemble APK
-./gradlew :app:assembleMockDebug
-./gradlew :app:assembleProdDebug
-./gradlew :app:assembleProdRelease
+./gradlew :app:assembleApiDebug
+./gradlew :app:assembleApiRelease
+./gradlew :app:assembleFirebaseDebug
+./gradlew :app:assembleFirebaseRelease
 
 # Install directly to a connected device / emulator
-./gradlew :app:installMockDebug
-./gradlew :app:installProdDebug
+./gradlew :app:installApiDebug
+./gradlew :app:installFirebaseDebug
 
-# Run all unit tests
-./gradlew :app:testMockDebugUnitTest
+# Run unit tests for a variant
+./gradlew :app:testApiDebugUnitTest
+./gradlew :app:testFirebaseDebugUnitTest
 ```
+
+To switch variants in Android Studio: **View → Tool Windows → Build Variants**, then select `firebaseDebug` or `apiDebug`.
 
 ### Required Permissions
 
@@ -375,10 +451,12 @@ fun `Successful load should emit Loading then Success state`() = runTest {
 
 ### BuildConfig Fields
 
-| Field | Flavor | Value |
+| Field | Build Type | Value |
 |---|---|---|
-| `BASE_URL` | mock | `http://10.0.2.2:8080/api/` |
-| `BASE_URL` | prod | `http://13.49.114.84:8080/api/` |
+| `BASE_URL` | `debug` | `http://10.0.2.2:8080/api/` |
+| `BASE_URL` | `release` | `http://13.49.114.84:8080/api/` |
+
+`BASE_URL` is consumed by `NetworkModule` for Retrofit. The `firebase` flavor still compiles with this field but does not use it for user create/list operations.
 
 ### Google Sign-In
 
@@ -386,10 +464,55 @@ The Web Client ID is embedded in `LoginScreen.kt`. To use a different Firebase p
 
 ### Firebase
 
-Realtime Database rules and `google-services.json` are managed separately per environment. The database reference path for messages follows the pattern:
+`google-services.json` must be placed in `app/`. Realtime Database rules are managed in the Firebase Console.
+
+**Database structure:**
 
 ```
-chats/{senderId}_{receiverId}/messages/{messageId}
+/users/{timestampId}
+    id          : Long
+    username    : String
+    email       : String
+    avatarUrl   : String
+    isOnline    : Boolean
+    lat         : Double
+    lon         : Double
+
+/chats/{senderId}_{receiverId}/messages/{messageId}
+    messageId   : String
+    message     : String
+    timestamp   : Long
+    messageType : String  ("SENT" | "RECEIVED")
+    senderId    : Long
+    receiverId  : Long
+```
+
+**Security rules (development — open access):**
+
+```json
+{
+  "rules": {
+    ".read": true,
+    ".write": true
+  }
+}
+```
+
+**Security rules (production — authenticated access):**
+
+```json
+{
+  "rules": {
+    "users": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    },
+    "chats": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    }
+  }
+}
 ```
 
 ### SDK Versions

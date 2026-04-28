@@ -24,6 +24,16 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    flavorDimensions += "backend"
+    productFlavors {
+        create("api") {
+            dimension = "backend"
+        }
+        create("firebase") {
+            dimension = "backend"
+        }
+    }
+
     buildTypes {
         debug {
             isDebuggable = true
