@@ -1,9 +1,9 @@
-package com.dp.radar.com.dp.radar.ui.viewmodel
+package com.dp.radar.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dp.radar.com.dp.radar.domain.model.Chat
-import com.dp.radar.com.dp.radar.domain.model.MessageType
+import com.dp.radar.domain.model.Chat
+import com.dp.radar.domain.model.MessageType
 import com.dp.radar.data.repositories.ChatRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -38,12 +38,15 @@ class ChatViewModel @Inject constructor(
                             MessageType.RECEIVED
                         }
                         Chat(
-                            chatId = it.messageId ?: "", message = it.message ?: "",
-                            messageType = messageType, timestamp = it.timestamp
+                            chatId = it.messageId ?: "",
+                            message = it.message ?: "",
+                            messageType = messageType,
+                            timestamp = it.timestamp
                         )
                     }
                     _chats.value = chatList
-                })
+                }
+            )
         }
     }
 }

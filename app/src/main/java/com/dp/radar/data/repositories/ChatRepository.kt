@@ -1,9 +1,9 @@
 package com.dp.radar.data.repositories
 
 import android.util.Log
-import com.dp.radar.com.dp.radar.domain.model.Chat
-import com.dp.radar.com.dp.radar.domain.model.Message
-import com.dp.radar.com.dp.radar.domain.model.MessageType
+import com.dp.radar.domain.model.Chat
+import com.dp.radar.domain.model.Message
+import com.dp.radar.domain.model.MessageType
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
@@ -21,9 +21,12 @@ class ChatRepository {
             .push()
             .key ?: return
         val message = Message(
-            messageId = messageId, messageType = MessageType.SENT,
-            timestamp = System.currentTimeMillis(), message = chat.message,
-            senderId = senderId, receiverId = receiverId,
+            messageId = messageId,
+            messageType = MessageType.SENT,
+            timestamp = System.currentTimeMillis(),
+            message = chat.message,
+            senderId = senderId,
+            receiverId = receiverId,
         )
         firebaseDb
             .child("chats")
@@ -51,13 +54,13 @@ class ChatRepository {
 
                 override fun onCancelled(error: DatabaseError) {}
             })
-
     }
 
     private fun getChatId(user1: Long, user2: Long): String {
-        return if (user1 < user2)
+        return if (user1 < user2) {
             "chat_${user1}_$user2"
-        else
+        } else {
             "chat_${user2}_$user1"
+        }
     }
 }

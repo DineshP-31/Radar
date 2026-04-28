@@ -1,4 +1,4 @@
-package com.dp.radar.com.dp.radar.domain.model
+package com.dp.radar.domain.model
 
 data class LocationData(
     val latitude: Double,

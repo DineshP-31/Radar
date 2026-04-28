@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.hilt)
+    alias(libs.plugins.detekt)
     kotlin("kapt")
     id("kotlin-parcelize")
     id("com.google.gms.google-services")
@@ -70,8 +71,16 @@ kotlin {
     }
 }
 
+detekt {
+    config.setFrom(files("$rootDir/config/detekt/detekt.yml"))
+    buildUponDefaultConfig = true
+    autoCorrect = true
+    source.setFrom(files("src/main/java", "src/test/java"))
+}
+
 dependencies {
 
+    detektPlugins(libs.detekt.formatting)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)

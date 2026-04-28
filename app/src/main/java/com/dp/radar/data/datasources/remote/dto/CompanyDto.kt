@@ -1,4 +1,4 @@
-package com.dp.radar.com.dp.radar.data.datasources.remote.dto
+package com.dp.radar.data.datasources.remote.dto
 
 import kotlinx.serialization.Serializable
 

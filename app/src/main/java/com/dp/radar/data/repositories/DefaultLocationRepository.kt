@@ -1,9 +1,9 @@
-package com.dp.radar.com.dp.radar.data.repositories
+package com.dp.radar.data.repositories
 
 import android.annotation.SuppressLint
 import android.content.Context
-import com.dp.radar.com.dp.radar.domain.model.LocationData
-import com.dp.radar.com.dp.radar.domain.repositories.LocationRepository
+import com.dp.radar.domain.model.LocationData
+import com.dp.radar.domain.repositories.LocationRepository
 import com.google.android.gms.location.LocationServices
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.suspendCancellableCoroutine

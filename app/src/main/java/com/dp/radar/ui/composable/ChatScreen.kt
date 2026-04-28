@@ -1,4 +1,4 @@
-package com.dp.radar.com.dp.radar.ui.composable
+package com.dp.radar.ui.composable
 
 import android.annotation.SuppressLint
 import android.util.Log
@@ -37,10 +37,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
-import com.dp.radar.com.dp.radar.domain.model.User
-import com.dp.radar.com.dp.radar.ui.UserListIntent
-import com.dp.radar.com.dp.radar.ui.components.BackHandler
-import com.dp.radar.com.dp.radar.ui.components.SkeletonItemList
+import com.dp.radar.domain.model.User
+import com.dp.radar.ui.UserListIntent
+import com.dp.radar.ui.components.BackHandler
+import com.dp.radar.ui.components.SkeletonItemList
 import com.dp.radar.ui.viewmodel.UserListViewModel
 
 @SuppressLint("ContextCastToActivity")
@@ -175,10 +175,8 @@ fun UserItem(
     }
 }
 
-
 @Composable
 fun LoadingIndicator() {
-
     LazyColumn(
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp), // Space between items

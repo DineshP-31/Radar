@@ -1,7 +1,6 @@
 package com.dp.radar.data.datasources.remote.dto
 
-import com.dp.radar.com.dp.radar.domain.model.Chat
-import com.dp.radar.com.dp.radar.domain.model.User
+import com.dp.radar.domain.model.User
 import kotlinx.serialization.Serializable
 
 @Serializable

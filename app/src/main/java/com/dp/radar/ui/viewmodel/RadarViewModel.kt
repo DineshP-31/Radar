@@ -2,11 +2,11 @@ package com.dp.radar.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dp.radar.com.dp.radar.domain.login.ClearEmailUseCase
-import com.dp.radar.com.dp.radar.domain.login.GetIsLoggedInUseCase
-import com.dp.radar.com.dp.radar.domain.login.GetUserIdUseCase
-import com.dp.radar.com.dp.radar.domain.login.SaveEmailUseCase
-import com.dp.radar.com.dp.radar.domain.login.SaveUserIdUseCase
+import com.dp.radar.domain.login.ClearEmailUseCase
+import com.dp.radar.domain.login.GetIsLoggedInUseCase
+import com.dp.radar.domain.login.GetUserIdUseCase
+import com.dp.radar.domain.login.SaveEmailUseCase
+import com.dp.radar.domain.login.SaveUserIdUseCase
 import com.dp.radar.ui.navigation.RadarScreen
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow

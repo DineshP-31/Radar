@@ -63,7 +63,6 @@ fun LoginSuccessScreen(
             .fillMaxSize()
             .padding(24.dp)
     ) {
-
         // Center content
         Column(
             modifier = Modifier
@@ -72,7 +71,6 @@ fun LoginSuccessScreen(
                 .align(Alignment.TopCenter),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-
             // Green Tick
             Icon(
                 imageVector = Icons.Default.CheckCircle,
@@ -102,4 +100,3 @@ fun LoginSuccessScreen(
         }
     }
 }
-

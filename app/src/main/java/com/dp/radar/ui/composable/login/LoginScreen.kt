@@ -55,7 +55,6 @@ fun LoginScreen(
         val context = LocalContext.current
         context as Activity
 
-
         val signInClient = remember {
             Identity.getSignInClient(context)
         }
@@ -106,7 +105,6 @@ fun LoginScreen(
     }
 }
 
-
 @Composable
 fun LoginSection(onClick: () -> Unit) {
     var email by remember { mutableStateOf("") }
@@ -116,7 +114,6 @@ fun LoginSection(onClick: () -> Unit) {
         modifier = Modifier
             .fillMaxSize()
     ) {
-
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -124,7 +121,6 @@ fun LoginSection(onClick: () -> Unit) {
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-
             Text(
                 text = "Already Registered?",
                 style = MaterialTheme.typography.headlineSmall,
@@ -197,11 +193,8 @@ fun LoginSection(onClick: () -> Unit) {
     }
 }
 
-
 @Preview(showBackground = true)
 @Composable
 fun LoginScreenPreview() {
-
     LoginSection { }
-
 }

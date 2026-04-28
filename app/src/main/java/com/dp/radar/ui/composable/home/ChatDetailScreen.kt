@@ -49,10 +49,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import com.dp.radar.R
-import com.dp.radar.com.dp.radar.domain.model.Chat
-import com.dp.radar.com.dp.radar.domain.model.MessageType
-import com.dp.radar.com.dp.radar.domain.model.User
-import com.dp.radar.com.dp.radar.ui.viewmodel.ChatViewModel
+import com.dp.radar.domain.model.Chat
+import com.dp.radar.domain.model.MessageType
+import com.dp.radar.domain.model.User
+import com.dp.radar.ui.viewmodel.ChatViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale

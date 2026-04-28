@@ -1,6 +1,6 @@
-package com.dp.radar.com.dp.radar.domain.login
+package com.dp.radar.domain.login
 
-import com.dp.radar.com.dp.radar.domain.repositories.ILoginRepository
+import com.dp.radar.domain.repositories.ILoginRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 

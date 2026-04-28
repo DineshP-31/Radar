@@ -1,4 +1,4 @@
-package com.dp.radar.com.dp.radar.domain.repositories
+package com.dp.radar.domain.repositories
 
 import kotlinx.coroutines.flow.Flow
 

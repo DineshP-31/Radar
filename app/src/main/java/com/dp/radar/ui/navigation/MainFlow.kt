@@ -17,9 +17,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
-import com.dp.radar.com.dp.radar.ui.components.BottomBar
-import com.dp.radar.com.dp.radar.ui.components.RadarTopBar
-import com.dp.radar.com.dp.radar.ui.composable.ChatScreen
+import com.dp.radar.ui.components.BottomBar
+import com.dp.radar.ui.components.RadarTopBar
+import com.dp.radar.ui.composable.ChatScreen
 import com.dp.radar.ui.composable.home.ChatDetailScreen
 import com.dp.radar.ui.composable.home.HomeScreen
 import com.dp.radar.ui.viewmodel.RadarViewModel
@@ -46,16 +46,19 @@ fun MainFLow(radarViewModel: RadarViewModel) {
         },
 
         bottomBar = {
-            if (bottomBarState.show) BottomBar(bottomBarState.route, onClick = { route ->
-                navController.navigate(route)
-            })
+            if (bottomBarState.show) {
+                BottomBar(bottomBarState.route, onClick = { route ->
+                    navController.navigate(route)
+                })
+            }
         },
         modifier = Modifier
             .fillMaxSize()
     ) { padding ->
 
         NavHost(
-            navController, startDestination = RadarScreen.HomeScreen,
+            navController,
+            startDestination = RadarScreen.HomeScreen,
             enterTransition = {
                 slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Start, tween())
             },
@@ -70,7 +73,6 @@ fun MainFLow(radarViewModel: RadarViewModel) {
             },
             modifier = Modifier.padding(padding),
         ) {
-
             composable<RadarScreen.HomeScreen> {
                 HomeScreen(onItemClicked = { user ->
                     navController.navigate(
@@ -111,4 +113,3 @@ fun MainFLow(radarViewModel: RadarViewModel) {
         }
     }
 }
-

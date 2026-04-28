@@ -1,4 +1,4 @@
-package com.dp.radar.com.dp.radar.ui.style
+package com.dp.radar.ui.style
 
 object DesignConstants {
     const val ALPHA_MAX = 1f

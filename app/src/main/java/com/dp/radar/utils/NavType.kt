@@ -1,9 +1,9 @@
-package com.dp.radar.com.dp.radar.utils
+package com.dp.radar.utils
 
 import android.net.Uri
 import android.os.Bundle
 import androidx.navigation.NavType
-import com.dp.radar.com.dp.radar.domain.model.User
+import com.dp.radar.domain.model.User
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 

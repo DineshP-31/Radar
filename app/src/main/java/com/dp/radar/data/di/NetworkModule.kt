@@ -1,13 +1,13 @@
-package com.dp.radar.com.dp.radar.data.di
+package com.dp.radar.data.di
 
-import com.dp.radar.com.dp.radar.data.datasources.remote.RadarApiService
+import com.dp.radar.data.datasources.remote.RadarApiService
 import com.google.firebase.BuildConfig
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -18,7 +18,7 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
 
-    //private const val BASE_URL = "https://us-central1-mockradar-2812e.cloudfunctions.net/serveJson/"
+    // private const val BASE_URL = "https://us-central1-mockradar-2812e.cloudfunctions.net/serveJson/"
     private const val BASE_URL = com.dp.radar.BuildConfig.BASE_URL
 
     @Singleton

@@ -1,6 +1,6 @@
-package com.dp.radar.com.dp.radar.ui
+package com.dp.radar.ui
 
-import com.dp.radar.com.dp.radar.domain.model.User
+import com.dp.radar.domain.model.User
 
 sealed class UserListIntent {
     object LoadUsers : UserListIntent()

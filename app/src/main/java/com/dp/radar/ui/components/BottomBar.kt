@@ -1,4 +1,4 @@
-package com.dp.radar.com.dp.radar.ui.components
+package com.dp.radar.ui.components
 
 import android.util.Log
 import androidx.annotation.DrawableRes
@@ -14,12 +14,13 @@ import com.dp.radar.ui.navigation.RadarScreen
 
 @Composable
 fun BottomBar(
-    route: RadarScreen, onClick: (RadarScreen) -> Unit
+    route: RadarScreen,
+    onClick: (RadarScreen) -> Unit
 ) {
     val items = listOf(
         BottomNavItem.Home,
         BottomNavItem.Chat,
-        //BottomNavItem.Profile
+        // BottomNavItem.Profile
     )
 
     NavigationBar {
@@ -55,5 +56,5 @@ sealed class BottomNavItem(
 ) {
     object Home : BottomNavItem(RadarScreen.HomeScreen, "Home", R.drawable.ic_home)
     object Chat : BottomNavItem(RadarScreen.ChatScreen, "Chat", R.drawable.ic_chat)
-    //object Profile : BottomNavItem(RadarScreen.SettingsScreen, "Settings", R.drawable.ic_settings)
+    // object Profile : BottomNavItem(RadarScreen.SettingsScreen, "Settings", R.drawable.ic_settings)
 }

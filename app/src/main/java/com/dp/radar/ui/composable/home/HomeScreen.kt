@@ -39,11 +39,11 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
-import com.dp.radar.com.dp.radar.domain.model.User
-import com.dp.radar.com.dp.radar.ui.UserListIntent
-import com.dp.radar.com.dp.radar.ui.components.BackHandler
-import com.dp.radar.com.dp.radar.ui.components.GridItemSkeleton
-import com.dp.radar.com.dp.radar.ui.components.SkeletonItemList
+import com.dp.radar.domain.model.User
+import com.dp.radar.ui.UserListIntent
+import com.dp.radar.ui.components.BackHandler
+import com.dp.radar.ui.components.GridItemSkeleton
+import com.dp.radar.ui.components.SkeletonItemList
 import com.dp.radar.ui.viewmodel.UserListViewModel
 
 @SuppressLint("ContextCastToActivity")
@@ -54,7 +54,6 @@ fun HomeScreen(
     onItemClicked: (User) -> Unit
 ) {
     val state by viewModel.state.collectAsState()
-
 
     Box(
         modifier = Modifier
@@ -183,10 +182,8 @@ fun UserItem(
     }
 }
 
-
 @Composable
 fun LoadingIndicator() {
-
     LazyColumn(
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp), // Space between items
@@ -195,13 +192,11 @@ fun LoadingIndicator() {
         items(20) {
             SkeletonItemList()
         }
-
     }
 }
 
 @Composable
 fun LoadingIndicatorGrid() {
-
     LazyVerticalGrid(
         columns = GridCells.Fixed(3),
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 16.dp),

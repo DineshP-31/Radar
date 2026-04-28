@@ -1,9 +1,8 @@
-package com.dp.radar.com.dp.radar.domain
+package com.dp.radar.domain
 
-import com.dp.radar.com.dp.radar.domain.model.User
-import com.dp.radar.com.dp.radar.domain.model.UserRequestDto
-import com.dp.radar.com.dp.radar.domain.repositories.UserRepository
-import com.dp.radar.data.datasources.remote.dto.UserDto
+import com.dp.radar.domain.model.User
+import com.dp.radar.domain.model.UserRequestDto
+import com.dp.radar.domain.repositories.UserRepository
 import javax.inject.Inject
 
 class CreateUserUseCase @Inject constructor(

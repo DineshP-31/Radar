@@ -1,11 +1,11 @@
-package com.dp.radar.com.dp.radar.data.repositories
+package com.dp.radar.data.repositories
 
-import com.dp.radar.com.dp.radar.data.NetworkMonitor
-import com.dp.radar.com.dp.radar.data.datasources.remote.RadarApiService
-import com.dp.radar.com.dp.radar.domain.ApiResult
-import com.dp.radar.com.dp.radar.domain.model.User
-import com.dp.radar.com.dp.radar.domain.model.UserRequestDto
-import com.dp.radar.com.dp.radar.domain.repositories.UserRepository
+import com.dp.radar.data.NetworkMonitor
+import com.dp.radar.data.datasources.remote.RadarApiService
+import com.dp.radar.domain.ApiResult
+import com.dp.radar.domain.model.User
+import com.dp.radar.domain.model.UserRequestDto
+import com.dp.radar.domain.repositories.UserRepository
 import javax.inject.Inject
 
 class DefaultUserRepository @Inject constructor(
@@ -23,7 +23,6 @@ class DefaultUserRepository @Inject constructor(
                 val userDto = response.body()
                 val domainUsers = userDto!!.map { it.toDomain() }
                 ApiResult.Success(domainUsers)
-
             } else {
                 ApiResult.Error("Failed to load users")
             }
@@ -42,7 +41,6 @@ class DefaultUserRepository @Inject constructor(
                 val userDto = response.body()
                 val domainUsers = userDto!!.map { it.toDomain() }
                 ApiResult.Success(domainUsers)
-
             } else {
                 ApiResult.Error("Failed to load users")
             }
@@ -61,7 +59,6 @@ class DefaultUserRepository @Inject constructor(
                 val userDto = response.body()
                 val domainUsers = userDto!!.map { it.toDomain() }
                 ApiResult.Success(domainUsers)
-
             } else {
                 ApiResult.Error("Failed to load users")
             }
@@ -80,7 +77,6 @@ class DefaultUserRepository @Inject constructor(
                 val userDto = response.body()
                 val domainUsers = userDto!!.toDomain()
                 ApiResult.Success(domainUsers)
-
             } else {
                 ApiResult.Error("Failed to load users")
             }

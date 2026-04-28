@@ -1,4 +1,4 @@
-package com.dp.radar.com.dp.radar.ui.composable
+package com.dp.radar.ui.composable
 
 import android.Manifest
 import androidx.compose.foundation.Image
@@ -28,10 +28,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.dp.radar.R
-import com.dp.radar.com.dp.radar.domain.model.LocationData
-import com.dp.radar.com.dp.radar.ui.viewmodel.LocationUiState
-import com.dp.radar.com.dp.radar.ui.viewmodel.LocationViewModel
-import com.dp.radar.com.dp.radar.ui.viewmodel.SignUpViewModel
+import com.dp.radar.domain.model.LocationData
+import com.dp.radar.ui.viewmodel.LocationUiState
+import com.dp.radar.ui.viewmodel.LocationViewModel
+import com.dp.radar.ui.viewmodel.SignUpViewModel
 import com.dp.radar.data.datasources.remote.dto.LatLong
 import com.dp.radar.ui.viewmodel.RadarViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -112,7 +112,6 @@ fun LocationFetchScreen(
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-
             Image(
                 painter = painterResource(id = R.drawable.ic_gps),
                 contentDescription = "Location illustration",
@@ -148,7 +147,8 @@ fun LocationFetchScreen(
             ) {
                 Text(
                     "Location permission is required to continue",
-                    fontSize = 18.sp, textAlign = TextAlign.Center
+                    fontSize = 18.sp,
+                    textAlign = TextAlign.Center
                 )
                 Spacer(Modifier.height(16.dp))
                 Button(
@@ -190,9 +190,6 @@ fun LocationFetchScreenPreview() {
         onContinue = {},
         isPermissionGranted = false,
         allowPermission = {
-
         }
     )
 }
-
-

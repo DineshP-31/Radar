@@ -1,7 +1,7 @@
-package com.dp.radar.com.dp.radar.domain
+package com.dp.radar.domain
 
-import com.dp.radar.com.dp.radar.domain.model.User
-import com.dp.radar.com.dp.radar.domain.repositories.UserRepository
+import com.dp.radar.domain.model.User
+import com.dp.radar.domain.repositories.UserRepository
 import javax.inject.Inject
 
 class GetUserChatUseCase @Inject constructor(

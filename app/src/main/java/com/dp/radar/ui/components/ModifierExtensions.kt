@@ -1,4 +1,4 @@
-package com.dp.radar.com.dp.radar.ui.components
+package com.dp.radar.ui.components
 
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloat
@@ -18,8 +18,8 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.IntSize
 import com.dp.radar.R
-import com.dp.radar.com.dp.radar.ui.style.DesignConstants.ALPHA_MED
-import com.dp.radar.com.dp.radar.ui.style.DesignConstants.ALPHA_VERY_LOW
+import com.dp.radar.ui.style.DesignConstants.ALPHA_MED
+import com.dp.radar.ui.style.DesignConstants.ALPHA_VERY_LOW
 
 fun Modifier.shimmerEffect(): Modifier = composed {
     var size by remember { mutableStateOf(IntSize.Zero) }

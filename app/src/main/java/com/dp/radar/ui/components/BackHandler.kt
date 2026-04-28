@@ -1,4 +1,4 @@
-package com.dp.radar.com.dp.radar.ui.components
+package com.dp.radar.ui.components
 
 import android.app.Activity
 import android.content.Context

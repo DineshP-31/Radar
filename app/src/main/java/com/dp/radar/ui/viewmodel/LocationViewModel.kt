@@ -1,9 +1,9 @@
-package com.dp.radar.com.dp.radar.ui.viewmodel
+package com.dp.radar.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dp.radar.com.dp.radar.domain.GetCurrentLocationUseCase
-import com.dp.radar.com.dp.radar.domain.model.LocationData
+import com.dp.radar.domain.GetCurrentLocationUseCase
+import com.dp.radar.domain.model.LocationData
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -32,7 +32,6 @@ class LocationViewModel @Inject constructor(
         }
     }
 }
-
 
 data class LocationUiState(
     val isLoading: Boolean = false,

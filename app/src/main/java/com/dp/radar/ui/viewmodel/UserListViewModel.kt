@@ -2,11 +2,11 @@ package com.dp.radar.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dp.radar.com.dp.radar.domain.ApiResult
-import com.dp.radar.com.dp.radar.domain.login.GetUserIdUseCase
-import com.dp.radar.com.dp.radar.domain.model.Chat
-import com.dp.radar.com.dp.radar.ui.UserListIntent
-import com.dp.radar.com.dp.radar.ui.UserListState
+import com.dp.radar.domain.ApiResult
+import com.dp.radar.domain.login.GetUserIdUseCase
+import com.dp.radar.domain.model.Chat
+import com.dp.radar.ui.UserListIntent
+import com.dp.radar.ui.UserListState
 import com.dp.radar.domain.GetUsersUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher

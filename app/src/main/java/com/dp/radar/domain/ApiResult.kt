@@ -1,6 +1,4 @@
-package com.dp.radar.com.dp.radar.domain
-
-import androidx.compose.ui.Modifier
+package com.dp.radar.domain
 
 sealed interface ApiResult<out T> {
     data class Success<T>(val data: T) : ApiResult<T>

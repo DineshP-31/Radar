@@ -1,4 +1,4 @@
-package com.dp.radar.com.dp.radar.ui.navigation
+package com.dp.radar.ui.navigation
 
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.tween
@@ -14,7 +14,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.dp.radar.R
-import com.dp.radar.com.dp.radar.ui.composable.LocationFetchRoute
+import com.dp.radar.ui.composable.LocationFetchRoute
 import com.dp.radar.ui.composable.login.LoginScreen
 import com.dp.radar.ui.composable.login.LoginSuccessScreen
 import com.dp.radar.ui.navigation.RadarScreen
@@ -22,14 +22,14 @@ import com.dp.radar.ui.viewmodel.RadarViewModel
 
 @Composable
 fun LoginFlow(radarViewModel: RadarViewModel) {
-
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = colorResource(R.color.primary_background)
     ) {
         val navController = rememberNavController()
         NavHost(
-            navController, startDestination = RadarScreen.LoginScreen,
+            navController,
+            startDestination = RadarScreen.LoginScreen,
             enterTransition = {
                 slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Start, tween())
             },
@@ -44,7 +44,6 @@ fun LoginFlow(radarViewModel: RadarViewModel) {
             },
             modifier = Modifier.padding(16.dp),
         ) {
-
             composable<RadarScreen.LoginScreen> {
                 LoginScreen(
                     onLoginSuccess = { name, email ->
@@ -66,7 +65,8 @@ fun LoginFlow(radarViewModel: RadarViewModel) {
                     email = route.email,
                     goToSuccessScreen = {
                         navController.navigate(RadarScreen.LoginSuccessScreen)
-                    })
+                    }
+                )
             }
         }
     }

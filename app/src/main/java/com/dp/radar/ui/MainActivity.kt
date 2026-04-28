@@ -9,8 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.dp.radar.com.dp.radar.ui.Study
-import com.dp.radar.com.dp.radar.ui.navigation.LoginFlow
+import com.dp.radar.ui.navigation.LoginFlow
 import com.dp.radar.ui.navigation.MainFLow
 import com.dp.radar.ui.theme.RadarTheme
 import com.dp.radar.ui.viewmodel.RadarViewModel
@@ -42,4 +41,3 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-

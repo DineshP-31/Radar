@@ -1,4 +1,4 @@
-package com.dp.radar.com.dp.radar.ui.components
+package com.dp.radar.ui.components
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
