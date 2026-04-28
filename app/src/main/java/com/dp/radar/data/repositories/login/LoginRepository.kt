@@ -1,35 +1,39 @@
 package com.dp.radar.data.repositories.login
 
-import android.content.SharedPreferences
-import javax.inject.Inject
-import androidx.core.content.edit
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.longPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
 import com.dp.radar.com.dp.radar.domain.repositories.ILoginRepository
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+import javax.inject.Inject
 
 class LoginRepository @Inject constructor(
-    private val sharedPrefs: SharedPreferences
+    private val dataStore: DataStore<Preferences>
 ) : ILoginRepository {
 
     companion object {
-        private const val KEY_EMAIL = "user_email"
-        private const val KEY_USER_ID = "user_id"
+        private val KEY_EMAIL = stringPreferencesKey("user_email")
+        private val KEY_USER_ID = longPreferencesKey("user_id")
     }
 
-    override fun saveEmail(email: String) {
-        sharedPrefs.edit { putString(KEY_EMAIL, email) }
+    override val isLoggedIn: Flow<Boolean> = dataStore.data
+        .map { prefs -> prefs[KEY_EMAIL] != null }
+
+    override val userId: Flow<Long> = dataStore.data
+        .map { prefs -> prefs[KEY_USER_ID] ?: -1L }
+
+    override suspend fun saveEmail(email: String) {
+        dataStore.edit { prefs -> prefs[KEY_EMAIL] = email }
     }
 
-    override fun saveUserId(userId: Long) {
-        sharedPrefs.edit { putLong(KEY_USER_ID, userId) }
+    override suspend fun saveUserId(userId: Long) {
+        dataStore.edit { prefs -> prefs[KEY_USER_ID] = userId }
     }
 
-    override fun getUserId(): Long {
-
-        return sharedPrefs.getLong(KEY_USER_ID, -1)
+    override suspend fun clearEmail() {
+        dataStore.edit { prefs -> prefs.remove(KEY_EMAIL) }
     }
-
-    override fun clearEmail() {
-        sharedPrefs.edit { remove(KEY_EMAIL) }
-    }
-
-    override fun isLoggedIn(): Boolean = sharedPrefs.getString(KEY_EMAIL, null) != null
 }

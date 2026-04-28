@@ -24,7 +24,7 @@ A real-time, location-based social messaging app for Android. Radar lets users d
 - **Location Onboarding** — captures the device's GPS coordinates on first launch to register the user
 - **User Discovery** — grid view of nearby users with real-time online/offline status indicators
 - **Instant Messaging** — bidirectional chat backed by Firebase Realtime Database with sent/received message bubbles
-- **Session Persistence** — login state survives app restarts via DataStore / SharedPreferences
+- **Session Persistence** — login state survives app restarts via Jetpack DataStore Preferences, exposed as a reactive `Flow<Boolean>`
 - **Skeleton Loaders & Error States** — polished loading/error/empty UI throughout
 - **Mock & Prod Flavors** — swap between a local development server and a production AWS server at build time
 
@@ -40,7 +40,7 @@ Radar follows **Clean Architecture** with an **MVI pattern** on the presentation
 ├─────────────────────────────┤
 │         Domain              │  Use Cases, Domain Models, Repository Interfaces
 ├─────────────────────────────┤
-│          Data               │  Retrofit API, Firebase, SharedPreferences, Repositories
+│          Data               │  Retrofit API, Firebase, DataStore Preferences, Repositories
 └─────────────────────────────┘
 ```
 
@@ -62,7 +62,7 @@ Other ViewModels (`ChatViewModel`, `SignUpViewModel`, `LocationViewModel`) follo
 ### Domain
 
 Pure Kotlin — no Android dependencies. Defines:
-- **Use Cases** — one public `operator fun invoke()` or `suspend operator fun invoke()` each
+- **Use Cases** — read use cases return `Flow<T>` directly from the repository; write use cases are `suspend operator fun invoke()`
 - **Repository interfaces** — abstractions the Data layer implements
 - **Domain models** — `User`, `Chat`, `Message`, `LocationData`, `ApiResult<T>`
 
@@ -71,7 +71,7 @@ Pure Kotlin — no Android dependencies. Defines:
 - **`DefaultUserRepository`** — wraps `RadarApiService` (Retrofit), checks network availability before calls
 - **`ChatRepository`** — wraps Firebase Realtime Database, exposes a `Flow<List<Message>>`
 - **`DefaultLocationRepository`** — wraps `FusedLocationProviderClient` via `suspendCancellableCoroutine`
-- **`LoginRepository`** — reads/writes auth state to SharedPreferences
+- **`LoginRepository`** — reads/writes auth state to `DataStore<Preferences>`; reads are exposed as `Flow<Boolean>` / `Flow<Long>` so all consumers react automatically to state changes
 
 ---
 
@@ -117,10 +117,10 @@ app/src/main/java/com/dp/radar/
 │   │   ├── DefaultUserRepository.kt    # Implements UserRepository via Retrofit
 │   │   ├── DefaultLocationRepository.kt# Implements LocationRepository via FusedLocation
 │   │   ├── ChatRepository.kt           # Firebase Realtime Database adapter
-│   │   └── login/LoginRepository.kt    # Auth state (SharedPreferences)
+│   │   └── login/LoginRepository.kt    # Auth state (DataStore<Preferences>)
 │   ├── di/
 │   │   ├── NetworkModule.kt            # Hilt: Retrofit, OkHttp, Moshi, base URL
-│   │   └── RadarModule.kt              # Hilt: repositories, dispatcher, prefs
+│   │   └── RadarModule.kt              # Hilt: repositories, DataStore, dispatcher
 │   └── NetworkMonitor.kt               # Connectivity check before API calls
 │
 ├── domain/
@@ -130,7 +130,7 @@ app/src/main/java/com/dp/radar/
 │   ├── repositories/
 │   │   ├── UserRepository.kt           # getUsers(), createUser()
 │   │   ├── LocationRepository.kt       # getCurrentLocation()
-│   │   └── ILoginRepository.kt         # saveEmail/Id, isLoggedIn, clearEmail
+│   │   └── ILoginRepository.kt         # Flow<Boolean> isLoggedIn, Flow<Long> userId, suspend writes
 │   ├── login/
 │   │   ├── GetIsLoggedInUseCase.kt
 │   │   ├── GetUserIdUseCase.kt
@@ -179,8 +179,14 @@ app/src/main/java/com/dp/radar/
     └── NavType.kt                      # Custom nav argument serializers
 
 app/src/test/java/com/dp/radar/
+├── data/repositories/login/
+│   └── LoginRepositoryTest.kt          # DataStore-backed real instance + Turbine
 ├── domain/
-│   └── GetUsersUseCaseTest.kt
+│   ├── GetUsersUseCaseTest.kt
+│   └── login/
+│       ├── GetIsLoggedInUseCaseTest.kt
+│       ├── SaveEmailUseCaseTest.kt
+│       └── ClearEmailUseCaseTest.kt
 ├── ui/viewmodel/
 │   └── UserListViewModelTest.kt
 └── utils/
@@ -243,14 +249,22 @@ User sends message
 
 ```
 App launch
-  └─ RadarViewModel checks GetIsLoggedInUseCase()
-       ├─ true  → MainFlow (Home)
-       └─ false → LoginFlow
+  └─ RadarViewModel.isLoggedIn: StateFlow<Boolean>
+       └─ GetIsLoggedInUseCase() → ILoginRepository.isLoggedIn: Flow<Boolean>
+            └─ DataStore<Preferences>.data.map { prefs[KEY_EMAIL] != null }
+                 ├─ emits true  → MainActivity shows MainFlow (Home)
+                 └─ emits false → MainActivity shows LoginFlow
 
-LoginScreen
+Login / Onboarding
   └─ Google Credential Manager → idToken / email
-       └─ SaveEmailUseCase() + SaveUserIdUseCase()
-            └─ Navigate to LocationScreen (first time) or Home
+       └─ viewModelScope.launch { SaveEmailUseCase(email) }   // suspend → DataStore.edit
+            └─ DataStore emits updated prefs
+                 └─ isLoggedIn Flow emits true → UI auto-navigates to MainFlow
+
+Logout
+  └─ viewModelScope.launch { ClearEmailUseCase() }            // suspend → DataStore.edit
+       └─ DataStore emits updated prefs
+            └─ isLoggedIn Flow emits false → UI shows LoginFlow
 ```
 
 ---
@@ -307,12 +321,28 @@ Unit tests live under `app/src/test/`. The project uses:
 |---|---|
 | JUnit 4 | Test runner and assertions |
 | Mockito Kotlin | Mocking dependencies (supports final Kotlin classes via mockito-core 5.x) |
-| Turbine | Asserting `StateFlow` emissions in sequence |
+| Turbine | Asserting `Flow` / `StateFlow` emissions in sequence |
 | Kotlinx Coroutines Test | `runTest`, `StandardTestDispatcher`, `TestCoroutineScheduler` |
+| DataStore (real instance) | `LoginRepositoryTest` uses a real `DataStore` backed by a temp file — no mocking needed |
 
 ### Key Test Helpers
 
 **`MainDispatcherRule`** — a JUnit `TestWatcher` that replaces `Dispatchers.Main` with an `UnconfinedTestDispatcher` before each test and resets it after. Required for any ViewModel test that uses `viewModelScope`.
+
+### Repository Tests
+
+`LoginRepositoryTest` exercises the DataStore-backed repository with a real `PreferenceDataStoreFactory` instance pointing at a temp file, and asserts `Flow` emissions with Turbine:
+
+```kotlin
+@Test
+fun `saveEmail causes isLoggedIn to emit true`() = runTest(testDispatcher) {
+    repository.saveEmail("test@example.com")
+    repository.isLoggedIn.test {
+        assertEquals(true, awaitItem())
+        cancelAndIgnoreRemainingEvents()
+    }
+}
+```
 
 ### ViewModel Tests
 

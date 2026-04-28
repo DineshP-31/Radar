@@ -8,6 +8,7 @@ import com.dp.radar.data.datasources.remote.dto.LatLong
 import com.dp.radar.domain.GetUsersUseCase
 import com.dp.radar.utils.MainDispatcherRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -33,7 +34,7 @@ class UserListViewModelTest {
     fun setup() {
         mockGetUsersUseCase = mock()
         mockGetUserIdUseCase = mock()
-        whenever(mockGetUserIdUseCase.invoke()).thenReturn(0L)
+        whenever(mockGetUserIdUseCase.invoke()).thenReturn(flowOf(0L))
     }
 
     @Test

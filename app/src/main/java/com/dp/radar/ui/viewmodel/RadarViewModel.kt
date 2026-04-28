@@ -1,6 +1,7 @@
 package com.dp.radar.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.dp.radar.com.dp.radar.domain.login.ClearEmailUseCase
 import com.dp.radar.com.dp.radar.domain.login.GetIsLoggedInUseCase
 import com.dp.radar.com.dp.radar.domain.login.GetUserIdUseCase
@@ -9,8 +10,11 @@ import com.dp.radar.com.dp.radar.domain.login.SaveUserIdUseCase
 import com.dp.radar.ui.navigation.RadarScreen
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -18,7 +22,7 @@ class RadarViewModel @Inject constructor(
     getIsLoggedInUseCase: GetIsLoggedInUseCase,
     private val saveEmailUseCase: SaveEmailUseCase,
     private val clearEmailUseCase: ClearEmailUseCase,
-    private val getUserIdUseCase: GetUserIdUseCase,
+    getUserIdUseCase: GetUserIdUseCase,
     private val saveUserIdUseCase: SaveUserIdUseCase,
 ) : ViewModel() {
 
@@ -28,6 +32,12 @@ class RadarViewModel @Inject constructor(
     private val _topBarTitle = MutableStateFlow("")
     val topBarTitle = _topBarTitle.asStateFlow()
 
+    val isLoggedIn: StateFlow<Boolean> = getIsLoggedInUseCase()
+        .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
+    val userId: StateFlow<Long> = getUserIdUseCase()
+        .stateIn(viewModelScope, SharingStarted.Eagerly, -1L)
+
     fun updateBottomBar(show: Boolean, screen: RadarScreen) {
         _bottomBarState.value = BottomBarState(show, screen)
     }
@@ -36,28 +46,26 @@ class RadarViewModel @Inject constructor(
         _topBarTitle.value = title
     }
 
-    private val _isLoggedIn = MutableStateFlow(getIsLoggedInUseCase())
-    val isLoggedIn: StateFlow<Boolean> = _isLoggedIn
-
     fun onLoginSuccess(email: String) {
-        saveEmailUseCase(email)
-        //_isLoggedIn.value = true
+        viewModelScope.launch {
+            saveEmailUseCase(email)
+        }
     }
 
-    fun updateLoginState(isLoggedIn: Boolean) {
-        _isLoggedIn.value = isLoggedIn
-    }
+    fun updateLoginState(isLoggedIn: Boolean) { }
 
     fun onBoardingCompleted(userId: Long) {
-        saveUserIdUseCase(userId)
-
+        viewModelScope.launch {
+            saveUserIdUseCase(userId)
+        }
     }
 
-    fun getUserId(): Long = getUserIdUseCase()
+    fun getUserId(): Long = userId.value
 
     fun logout() {
-        clearEmailUseCase()
-        _isLoggedIn.value = false
+        viewModelScope.launch {
+            clearEmailUseCase()
+        }
     }
 }
 
