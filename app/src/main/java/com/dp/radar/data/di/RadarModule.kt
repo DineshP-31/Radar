@@ -1,7 +1,9 @@
 package com.dp.radar.data.di
 
 import android.content.Context
-import android.content.SharedPreferences
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import com.dp.radar.com.dp.radar.data.AndroidNetworkMonitor
 import com.dp.radar.com.dp.radar.data.NetworkMonitor
 import com.dp.radar.com.dp.radar.data.datasources.remote.RadarApiService
@@ -27,14 +29,16 @@ object RadarModule {
 
     @Provides
     @Singleton
-    fun provideSharedPreferences(@ApplicationContext context: Context): SharedPreferences {
-        return context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+    fun provideDataStore(@ApplicationContext context: Context): DataStore<Preferences> {
+        return PreferenceDataStoreFactory.create(
+            produceFile = { java.io.File(context.filesDir, "datastore/user_prefs.preferences_pb") }
+        )
     }
 
     @Provides
     @Singleton
-    fun providesLoginRepository(sharedPreferences: dagger.Lazy<SharedPreferences>): ILoginRepository {
-        return LoginRepository(sharedPreferences.get())
+    fun providesLoginRepository(dataStore: DataStore<Preferences>): ILoginRepository {
+        return LoginRepository(dataStore)
     }
     @Provides
     fun provideNetworkStatus(@ApplicationContext context: Context): NetworkMonitor {

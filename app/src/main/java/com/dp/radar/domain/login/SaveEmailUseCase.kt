@@ -6,5 +6,5 @@ import javax.inject.Inject
 class SaveEmailUseCase @Inject constructor(
     private val repository: ILoginRepository
 ) {
-    operator fun invoke(email: String) = repository.saveEmail(email)
+    suspend operator fun invoke(email: String) = repository.saveEmail(email)
 }

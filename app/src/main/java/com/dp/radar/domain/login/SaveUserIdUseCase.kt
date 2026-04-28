@@ -6,5 +6,5 @@ import javax.inject.Inject
 class SaveUserIdUseCase @Inject constructor(
     private val repository: ILoginRepository
 ) {
-    operator fun invoke(userId: Long) = repository.saveUserId(userId)
+    suspend operator fun invoke(userId: Long) = repository.saveUserId(userId)
 }

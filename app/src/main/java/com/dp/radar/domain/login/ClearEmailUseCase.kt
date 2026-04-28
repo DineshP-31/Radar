@@ -6,5 +6,5 @@ import javax.inject.Inject
 class ClearEmailUseCase @Inject constructor(
     private val repository: ILoginRepository
 ) {
-    operator fun invoke() = repository.clearEmail()
+    suspend operator fun invoke() = repository.clearEmail()
 }

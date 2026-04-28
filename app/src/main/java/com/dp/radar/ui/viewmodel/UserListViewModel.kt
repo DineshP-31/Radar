@@ -13,6 +13,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -45,8 +46,9 @@ class UserListViewModel @Inject constructor(
             _state.value = _state.value.copy(isLoading = true, error = null)
             when (val result = getUsersUseCase()) {
                 is ApiResult.Success -> {
+                    val currentUserId = getUserIdUseCase().first()
                     val data = result.data.filter {
-                        it.id != getUserIdUseCase()
+                        it.id != currentUserId
                     }
                     _state.update {
                         it.copy(users = data, isLoading = false, error = null)
