@@ -63,14 +63,6 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-    kotlinOptions {
-        jvmTarget = "11"
-        freeCompilerArgs = listOf("-XXLanguage:+PropertyParamAnnotationDefaultTargetMode")
-    }
-    buildFeatures {
-        compose = true
-    }
-
     testOptions {
         unitTests.isReturnDefaultValues = true
     }
@@ -82,6 +74,13 @@ android {
     }
     configurations.all {
         resolutionStrategy.force("com.squareup:javapoet:1.13.0")
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11
+        freeCompilerArgs.addAll("-XXLanguage:+PropertyParamAnnotationDefaultTargetMode")
     }
 }
 

@@ -25,7 +25,6 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            val study = Study().launchTest()
             val isLoggedIn by radarViewModel.isLoggedIn.collectAsStateWithLifecycle()
 
             RadarTheme {
