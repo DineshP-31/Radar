@@ -1,11 +1,12 @@
 package com.dp.radar.ui.viewmodel
 
 import app.cash.turbine.test
-import com.dp.radar.com.dp.radar.domain.ApiResult
-import com.dp.radar.com.dp.radar.domain.login.GetUserIdUseCase
-import com.dp.radar.com.dp.radar.domain.model.User
 import com.dp.radar.data.datasources.remote.dto.LatLong
+import com.dp.radar.domain.ApiResult
 import com.dp.radar.domain.GetUsersUseCase
+import com.dp.radar.domain.ObserveUsersUseCase
+import com.dp.radar.domain.login.GetUserIdUseCase
+import com.dp.radar.domain.model.User
 import com.dp.radar.utils.MainDispatcherRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
@@ -26,13 +27,16 @@ class UserListViewModelTest {
     val mainDispatcherRule = MainDispatcherRule()
 
     private lateinit var mockGetUsersUseCase: GetUsersUseCase
+    private lateinit var mockObserveUsersUseCase: ObserveUsersUseCase
     private lateinit var mockGetUserIdUseCase: GetUserIdUseCase
     private lateinit var viewModel: UserListViewModel
+
     private val fakeUsers = listOf(User(1L, "A", "a@t.com", latLong = LatLong(0.0, 0.0)))
 
     @Before
     fun setup() {
         mockGetUsersUseCase = mock()
+        mockObserveUsersUseCase = mock()
         mockGetUserIdUseCase = mock()
         whenever(mockGetUserIdUseCase.invoke()).thenReturn(flowOf(0L))
     }
@@ -40,16 +44,27 @@ class UserListViewModelTest {
     @Test
     fun `Successful load should emit Loading then Success state`() = runTest {
         whenever(mockGetUsersUseCase.invoke()).thenReturn(ApiResult.Success(fakeUsers))
-        viewModel = UserListViewModel(mockGetUsersUseCase, mockGetUserIdUseCase, StandardTestDispatcher(testScheduler))
+        whenever(mockObserveUsersUseCase.invoke()).thenReturn(flowOf(fakeUsers))
+        viewModel = UserListViewModel(
+            mockGetUsersUseCase,
+            mockObserveUsersUseCase,
+            mockGetUserIdUseCase,
+            StandardTestDispatcher(testScheduler),
+        )
 
         viewModel.state.test {
-            val initial = awaitItem()
-            assertEquals(false, initial.isLoading, "Initial state should be non-loading")
+            assertEquals(false, awaitItem().isLoading) // initial
 
-            val loading = awaitItem()
-            assertTrue(loading.isLoading, "Second state should be Loading")
+            // startObservingUsers populates users from Room cache before network fires
+            val withUsers = awaitItem()
+            assertEquals(fakeUsers, withUsers.users)
+            assertEquals(false, withUsers.isLoading)
 
-            val success = awaitItem()
+            val loading = awaitItem() // refreshFromNetwork sets isLoading = true
+            assertTrue(loading.isLoading, "Should transition to Loading")
+            assertEquals(fakeUsers, loading.users)
+
+            val success = awaitItem() // refreshFromNetwork completes successfully
             assertEquals(false, success.isLoading, "Final state should not be loading")
             assertEquals(fakeUsers, success.users, "Should contain the fetched user list")
             assertEquals(null, success.error, "Error must be null")
@@ -62,10 +77,17 @@ class UserListViewModelTest {
     fun `Load failure should emit Loading then Error state`() = runTest {
         val errorMessage = "Network timeout"
         whenever(mockGetUsersUseCase.invoke()).thenReturn(ApiResult.Error(errorMessage))
-        viewModel = UserListViewModel(mockGetUsersUseCase, mockGetUserIdUseCase, StandardTestDispatcher(testScheduler))
+        // Empty Room cache — startObservingUsers emits same state as initial, deduplicated
+        whenever(mockObserveUsersUseCase.invoke()).thenReturn(flowOf(emptyList()))
+        viewModel = UserListViewModel(
+            mockGetUsersUseCase,
+            mockObserveUsersUseCase,
+            mockGetUserIdUseCase,
+            StandardTestDispatcher(testScheduler),
+        )
 
         viewModel.state.test {
-            awaitItem() // ignore initial state
+            awaitItem() // initial
 
             val loading = awaitItem()
             assertTrue(loading.isLoading, "State should transition to Loading")

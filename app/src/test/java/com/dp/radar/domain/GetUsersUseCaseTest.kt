@@ -1,9 +1,8 @@
 package com.dp.radar.domain
 
-import com.dp.radar.com.dp.radar.domain.ApiResult
-import com.dp.radar.com.dp.radar.domain.model.User
-import com.dp.radar.com.dp.radar.domain.repositories.UserRepository
 import com.dp.radar.data.datasources.remote.dto.LatLong
+import com.dp.radar.domain.model.User
+import com.dp.radar.domain.repositories.UserRepository
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -28,7 +27,7 @@ class GetUsersUseCaseTest {
     fun `invoke should return success result when repository call succeeds`() = runTest {
         val expectedUsers = listOf(
             User(1L, "Alice", "alice@test.com", latLong = LatLong(0.0, 0.0)),
-            User(2L, "Bob", "bob@test.com", latLong = LatLong(0.0, 0.0))
+            User(2L, "Bob", "bob@test.com", latLong = LatLong(0.0, 0.0)),
         )
 
         whenever(mockRepository.getUsers()).thenReturn(ApiResult.Success(expectedUsers))
@@ -36,7 +35,6 @@ class GetUsersUseCaseTest {
         val result = getUsersUseCase()
 
         verify(mockRepository).getUsers()
-
         assertTrue(result is ApiResult.Success)
         assertEquals(expectedUsers, result.data)
     }
@@ -50,7 +48,6 @@ class GetUsersUseCaseTest {
         val result = getUsersUseCase()
 
         verify(mockRepository).getUsers()
-
         assertTrue(result is ApiResult.Error)
         assertEquals(errorMessage, result.message)
     }

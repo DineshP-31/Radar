@@ -1,7 +1,6 @@
 package com.dp.radar.domain.login
 
-import com.dp.radar.com.dp.radar.domain.login.ClearEmailUseCase
-import com.dp.radar.com.dp.radar.domain.repositories.ILoginRepository
+import com.dp.radar.domain.repositories.ILoginRepository
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.mockito.Mock

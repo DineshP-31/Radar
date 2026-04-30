@@ -1,7 +1,6 @@
 package com.dp.radar.domain.login
 
-import com.dp.radar.com.dp.radar.domain.login.GetIsLoggedInUseCase
-import com.dp.radar.com.dp.radar.domain.repositories.ILoginRepository
+import com.dp.radar.domain.repositories.ILoginRepository
 import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
