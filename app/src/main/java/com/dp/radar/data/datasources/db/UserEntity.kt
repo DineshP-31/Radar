@@ -16,21 +16,23 @@ data class UserEntity(
     val lon: Double,
 )
 
-fun UserEntity.toDomain() = User(
-    id = id,
-    username = username,
-    email = email,
-    avatarUrl = avatarUrl,
-    isOnline = isOnline,
-    latLong = LatLong(lat, lon),
-)
+fun UserEntity.toDomain() =
+    User(
+        id = id,
+        username = username,
+        email = email,
+        avatarUrl = avatarUrl,
+        isOnline = isOnline,
+        latLong = LatLong(lat, lon),
+    )
 
-fun User.toEntity() = UserEntity(
-    id = id,
-    username = username,
-    email = email,
-    avatarUrl = avatarUrl,
-    isOnline = isOnline,
-    lat = latLong.lat,
-    lon = latLong.lon,
-)
+fun User.toEntity() =
+    UserEntity(
+        id = id,
+        username = username,
+        email = email,
+        avatarUrl = avatarUrl,
+        isOnline = isOnline,
+        lat = latLong.lat,
+        lon = latLong.lon,
+    )

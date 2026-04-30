@@ -1,7 +1,6 @@
 package com.dp.radar.data.di
 
 import com.dp.radar.data.datasources.remote.RadarApiService
-import com.google.firebase.BuildConfig
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import dagger.Module

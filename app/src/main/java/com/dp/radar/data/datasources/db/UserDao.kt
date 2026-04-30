@@ -8,7 +8,6 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 abstract class UserDao {
-
     @Query("SELECT * FROM users")
     abstract fun observeAll(): Flow<List<UserEntity>>
 

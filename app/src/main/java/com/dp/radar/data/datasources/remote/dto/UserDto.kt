@@ -15,8 +15,8 @@ data class UserDto(
     /**
      * Mapper function to convert this DTO into the clean Domain Model (Entity).
      */
-    fun toDomain(): User {
-        return User(
+    fun toDomain(): User =
+        User(
             id = this.id,
             username = this.username,
             email = this.email,
@@ -24,5 +24,4 @@ data class UserDto(
             isOnline = this.isOnline,
             latLong = this.latLong,
         )
-    }
 }

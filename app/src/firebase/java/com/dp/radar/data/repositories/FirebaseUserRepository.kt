@@ -19,12 +19,13 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import javax.inject.Inject
 import kotlin.coroutines.resume
 
-class FirebaseUserRepository @Inject constructor(
+class FirebaseUserRepository
+@Inject
+constructor(
     private val database: FirebaseDatabase,
     private val networkMonitor: NetworkMonitor,
     private val userDao: UserDao,
 ) : UserRepository {
-
     private val usersRef get() = database.getReference("users")
 
     override fun observeUsers(): Flow<List<User>> =
@@ -34,20 +35,22 @@ class FirebaseUserRepository @Inject constructor(
 
     override suspend fun getUsers(): ApiResult<List<User>> {
         if (!networkMonitor.isOnline()) return ApiResult.Error("Network unavailable")
-        val result = suspendCancellableCoroutine { cont ->
-            val listener = object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    val users = snapshot.children.mapNotNull { it.toUser() }
-                    cont.resume(ApiResult.Success(users))
-                }
+        val result =
+            suspendCancellableCoroutine { cont ->
+                val listener =
+                    object : ValueEventListener {
+                        override fun onDataChange(snapshot: DataSnapshot) {
+                            val users = snapshot.children.mapNotNull { it.toUser() }
+                            cont.resume(ApiResult.Success(users))
+                        }
 
-                override fun onCancelled(error: DatabaseError) {
-                    cont.resume(ApiResult.Error(error.message))
-                }
+                        override fun onCancelled(error: DatabaseError) {
+                            cont.resume(ApiResult.Error(error.message))
+                        }
+                    }
+                usersRef.addListenerForSingleValueEvent(listener)
+                cont.invokeOnCancellation { usersRef.removeEventListener(listener) }
             }
-            usersRef.addListenerForSingleValueEvent(listener)
-            cont.invokeOnCancellation { usersRef.removeEventListener(listener) }
-        }
         if (result is ApiResult.Success) {
             userDao.replaceAll(result.data.map { it.toEntity() })
         }
@@ -60,15 +63,18 @@ class FirebaseUserRepository @Inject constructor(
         if (!networkMonitor.isOnline()) return ApiResult.Error("Network unavailable")
         return suspendCancellableCoroutine { cont ->
             val id = System.currentTimeMillis()
-            val user = User(
-                id = id,
-                username = userRequestDto.username,
-                email = userRequestDto.email,
-                avatarUrl = userRequestDto.avatarUrl,
-                isOnline = userRequestDto.isOnline,
-                latLong = userRequestDto.latLong,
-            )
-            usersRef.child(id.toString()).setValue(user.toMap())
+            val user =
+                User(
+                    id = id,
+                    username = userRequestDto.username,
+                    email = userRequestDto.email,
+                    avatarUrl = userRequestDto.avatarUrl,
+                    isOnline = userRequestDto.isOnline,
+                    latLong = userRequestDto.latLong,
+                )
+            usersRef
+                .child(id.toString())
+                .setValue(user.toMap())
                 .addOnSuccessListener { cont.resume(ApiResult.Success(user)) }
                 .addOnFailureListener { e ->
                     cont.resume(ApiResult.Error(e.message ?: "Failed to create user"))
@@ -76,27 +82,30 @@ class FirebaseUserRepository @Inject constructor(
         }
     }
 
-    private fun DataSnapshot.toUser(): User? = runCatching {
-        User(
-            id = child("id").getValue(Long::class.java)!!,
-            username = child("username").getValue(String::class.java)!!,
-            email = child("email").getValue(String::class.java)!!,
-            avatarUrl = child("avatarUrl").getValue(String::class.java) ?: "https://i.pravatar.cc/150?img=1",
-            isOnline = child("isOnline").getValue(Boolean::class.java) ?: false,
-            latLong = LatLong(
-                lat = child("lat").getValue(Double::class.java) ?: 0.0,
-                lon = child("lon").getValue(Double::class.java) ?: 0.0,
-            ),
-        )
-    }.getOrNull()
+    private fun DataSnapshot.toUser(): User? =
+        runCatching {
+            User(
+                id = child("id").getValue(Long::class.java)!!,
+                username = child("username").getValue(String::class.java)!!,
+                email = child("email").getValue(String::class.java)!!,
+                avatarUrl = child("avatarUrl").getValue(String::class.java) ?: "https://i.pravatar.cc/150?img=1",
+                isOnline = child("isOnline").getValue(Boolean::class.java) ?: false,
+                latLong =
+                LatLong(
+                    lat = child("lat").getValue(Double::class.java) ?: 0.0,
+                    lon = child("lon").getValue(Double::class.java) ?: 0.0,
+                ),
+            )
+        }.getOrNull()
 
-    private fun User.toMap(): Map<String, Any> = mapOf(
-        "id" to id,
-        "username" to username,
-        "email" to email,
-        "avatarUrl" to avatarUrl,
-        "isOnline" to isOnline,
-        "lat" to latLong.lat,
-        "lon" to latLong.lon,
-    )
+    private fun User.toMap(): Map<String, Any> =
+        mapOf(
+            "id" to id,
+            "username" to username,
+            "email" to email,
+            "avatarUrl" to avatarUrl,
+            "isOnline" to isOnline,
+            "lat" to latLong.lat,
+            "lon" to latLong.lon,
+        )
 }

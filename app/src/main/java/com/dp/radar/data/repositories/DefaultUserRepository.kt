@@ -13,12 +13,13 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
-class DefaultUserRepository @Inject constructor(
+class DefaultUserRepository
+@Inject
+constructor(
     private val apiService: RadarApiService,
     private val networkMonitor: NetworkMonitor,
     private val userDao: UserDao,
 ) : UserRepository {
-
     override fun observeUsers(): Flow<List<User>> =
         userDao.observeAll().map { entities -> entities.map { it.toDomain() } }
 
