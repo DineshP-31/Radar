@@ -9,9 +9,8 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.suspendCancellableCoroutine
 
 class DefaultLocationRepository(
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
 ) : LocationRepository {
-
     private val fusedLocationClient =
         LocationServices.getFusedLocationProviderClient(context)
 
@@ -25,13 +24,12 @@ class DefaultLocationRepository(
                         continuation.resume(
                             LocationData(
                                 it.latitude,
-                                it.longitude
+                                it.longitude,
                             ),
-                            null
+                            null,
                         )
                     } ?: continuation.cancel()
-                }
-                .addOnFailureListener {
+                }.addOnFailureListener {
                     continuation.cancel(it)
                 }
         }

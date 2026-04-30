@@ -43,5 +43,5 @@ data class Message(
 @Serializable
 enum class MessageType {
     SENT,
-    RECEIVED
+    RECEIVED,
 }

@@ -8,11 +8,12 @@ import com.dp.radar.domain.model.UserRequestDto
 import com.dp.radar.domain.repositories.UserRepository
 import javax.inject.Inject
 
-class DefaultUserRepository @Inject constructor(
+class DefaultUserRepository
+@Inject
+constructor(
     private val apiService: RadarApiService,
-    private val networkMonitor: NetworkMonitor
+    private val networkMonitor: NetworkMonitor,
 ) : UserRepository {
-
     override suspend fun getUsers(userId: Long): ApiResult<List<User>> {
         if (!networkMonitor.isOnline()) {
             return ApiResult.Error("Network unavailable")

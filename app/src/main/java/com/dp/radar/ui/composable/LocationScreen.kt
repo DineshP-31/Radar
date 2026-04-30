@@ -28,12 +28,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.dp.radar.R
+import com.dp.radar.data.datasources.remote.dto.LatLong
 import com.dp.radar.domain.model.LocationData
 import com.dp.radar.ui.viewmodel.LocationUiState
 import com.dp.radar.ui.viewmodel.LocationViewModel
-import com.dp.radar.ui.viewmodel.SignUpViewModel
-import com.dp.radar.data.datasources.remote.dto.LatLong
 import com.dp.radar.ui.viewmodel.RadarViewModel
+import com.dp.radar.ui.viewmodel.SignUpViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState

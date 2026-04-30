@@ -17,14 +17,13 @@ import com.dp.radar.R
 import com.dp.radar.ui.composable.LocationFetchRoute
 import com.dp.radar.ui.composable.login.LoginScreen
 import com.dp.radar.ui.composable.login.LoginSuccessScreen
-import com.dp.radar.ui.navigation.RadarScreen
 import com.dp.radar.ui.viewmodel.RadarViewModel
 
 @Composable
 fun LoginFlow(radarViewModel: RadarViewModel) {
     Surface(
         modifier = Modifier.fillMaxSize(),
-        color = colorResource(R.color.primary_background)
+        color = colorResource(R.color.primary_background),
     ) {
         val navController = rememberNavController()
         NavHost(
@@ -48,7 +47,7 @@ fun LoginFlow(radarViewModel: RadarViewModel) {
                 LoginScreen(
                     onLoginSuccess = { name, email ->
                         navController.navigate(RadarScreen.LocationFetchScreen(name, email))
-                    }
+                    },
                 )
             }
 
@@ -65,7 +64,7 @@ fun LoginFlow(radarViewModel: RadarViewModel) {
                     email = route.email,
                     goToSuccessScreen = {
                         navController.navigate(RadarScreen.LoginSuccessScreen)
-                    }
+                    },
                 )
             }
         }

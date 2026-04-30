@@ -2,9 +2,9 @@ package com.dp.radar.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dp.radar.data.repositories.ChatRepository
 import com.dp.radar.domain.model.Chat
 import com.dp.radar.domain.model.MessageType
-import com.dp.radar.data.repositories.ChatRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

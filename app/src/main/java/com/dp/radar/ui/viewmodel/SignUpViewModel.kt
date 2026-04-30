@@ -2,11 +2,11 @@ package com.dp.radar.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dp.radar.data.datasources.remote.dto.LatLong
 import com.dp.radar.domain.ApiResult
 import com.dp.radar.domain.CreateUserUseCase
 import com.dp.radar.domain.model.UserRequestDto
 import com.dp.radar.ui.SignUpState
-import com.dp.radar.data.datasources.remote.dto.LatLong
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow

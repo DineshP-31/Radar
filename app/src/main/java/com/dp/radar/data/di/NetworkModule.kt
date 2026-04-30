@@ -17,43 +17,45 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
-
     // private const val BASE_URL = "https://us-central1-mockradar-2812e.cloudfunctions.net/serveJson/"
     private const val BASE_URL = com.dp.radar.BuildConfig.BASE_URL
 
     @Singleton
     @Provides
-    fun provideMoshi(): Moshi {
-        return Moshi.Builder()
+    fun provideMoshi(): Moshi =
+        Moshi
+            .Builder()
             .addLast(KotlinJsonAdapterFactory()) // Ensures Kotlin data classes are handled
             .build()
-    }
 
     @Singleton
     @Provides
     fun provideOkHttpClient(): OkHttpClient {
         // Logging interceptor for debugging network requests
-        val logging = HttpLoggingInterceptor().apply {
-            level = HttpLoggingInterceptor.Level.BODY
-        }
-        return OkHttpClient.Builder()
+        val logging =
+            HttpLoggingInterceptor().apply {
+                level = HttpLoggingInterceptor.Level.BODY
+            }
+        return OkHttpClient
+            .Builder()
             .addInterceptor(logging)
             .build()
     }
 
     @Singleton
     @Provides
-    fun provideRetrofit(okHttpClient: OkHttpClient, moshi: Moshi): Retrofit {
-        return Retrofit.Builder()
+    fun provideRetrofit(
+        okHttpClient: OkHttpClient,
+        moshi: Moshi,
+    ): Retrofit =
+        Retrofit
+            .Builder()
             .baseUrl(BASE_URL)
             .client(okHttpClient)
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .build()
-    }
 
     @Singleton
     @Provides
-    fun provideUserApiService(retrofit: Retrofit): RadarApiService {
-        return retrofit.create(RadarApiService::class.java)
-    }
+    fun provideUserApiService(retrofit: Retrofit): RadarApiService = retrofit.create(RadarApiService::class.java)
 }

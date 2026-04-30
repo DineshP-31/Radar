@@ -6,5 +6,5 @@ import kotlinx.serialization.Serializable
 data class CompanyDto(
     val name: String,
     val catchPhrase: String,
-    val bs: String
+    val bs: String,
 )

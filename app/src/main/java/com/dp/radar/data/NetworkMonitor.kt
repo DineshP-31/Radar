@@ -10,7 +10,9 @@ interface NetworkMonitor {
     fun isOnline(): Boolean
 }
 
-class AndroidNetworkMonitor(private val context: Context) : NetworkMonitor {
+class AndroidNetworkMonitor(
+    private val context: Context,
+) : NetworkMonitor {
     @RequiresPermission(Manifest.permission.ACCESS_NETWORK_STATE)
     override fun isOnline(): Boolean {
         val connectivityManager =

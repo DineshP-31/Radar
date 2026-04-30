@@ -1,6 +1,5 @@
 package com.dp.radar.domain
 
-import com.dp.radar.domain.ApiResult
 import com.dp.radar.domain.model.User
 import com.dp.radar.domain.repositories.UserRepository
 import javax.inject.Inject

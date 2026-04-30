@@ -10,20 +10,23 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
-class LoginRepository @Inject constructor(
-    private val dataStore: DataStore<Preferences>
+class LoginRepository
+@Inject
+constructor(
+    private val dataStore: DataStore<Preferences>,
 ) : ILoginRepository {
-
     companion object {
         private val KEY_EMAIL = stringPreferencesKey("user_email")
         private val KEY_USER_ID = longPreferencesKey("user_id")
     }
 
-    override val isLoggedIn: Flow<Boolean> = dataStore.data
-        .map { prefs -> prefs[KEY_EMAIL] != null }
+    override val isLoggedIn: Flow<Boolean> =
+        dataStore.data
+            .map { prefs -> prefs[KEY_EMAIL] != null }
 
-    override val userId: Flow<Long> = dataStore.data
-        .map { prefs -> prefs[KEY_USER_ID] ?: -1L }
+    override val userId: Flow<Long> =
+        dataStore.data
+            .map { prefs -> prefs[KEY_USER_ID] ?: -1L }
 
     override suspend fun saveEmail(email: String) {
         dataStore.edit { prefs -> prefs[KEY_EMAIL] = email }

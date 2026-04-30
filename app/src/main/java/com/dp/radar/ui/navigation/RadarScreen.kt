@@ -4,7 +4,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 sealed interface RadarScreen {
-
     @Serializable
     data object LoginScreen : RadarScreen
 
@@ -12,13 +11,19 @@ sealed interface RadarScreen {
     data object LoginSuccessScreen : RadarScreen
 
     @Serializable
-    data class LocationFetchScreen(val name: String, val email: String) : RadarScreen
+    data class LocationFetchScreen(
+        val name: String,
+        val email: String,
+    ) : RadarScreen
 
     @Serializable
     data object HomeScreen : RadarScreen
 
     @Serializable
-    data class ChatDetailScreen(val userId: Long, val userName: String) : RadarScreen
+    data class ChatDetailScreen(
+        val userId: Long,
+        val userName: String,
+    ) : RadarScreen
 
     @Serializable
     data object ChatScreen : RadarScreen

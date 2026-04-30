@@ -11,7 +11,7 @@ import com.dp.radar.ui.components.BackHandler
 fun SettingsScreen() {
     Column(
         verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text("Settings Screen")
     }

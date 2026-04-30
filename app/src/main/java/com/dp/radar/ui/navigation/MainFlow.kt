@@ -33,9 +33,10 @@ fun MainFLow(radarViewModel: RadarViewModel) {
     val topBarTitle by radarViewModel.topBarTitle.collectAsState()
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val enableBackArrow = remember(navBackStackEntry) {
-        navBackStackEntry?.destination?.route?.contains("ChatDetailScreen") ?: false
-    }
+    val enableBackArrow =
+        remember(navBackStackEntry) {
+            navBackStackEntry?.destination?.route?.contains("ChatDetailScreen") ?: false
+        }
     Scaffold(
         topBar = {
             RadarTopBar(
@@ -44,7 +45,6 @@ fun MainFLow(radarViewModel: RadarViewModel) {
                 navController = navController,
             )
         },
-
         bottomBar = {
             if (bottomBarState.show) {
                 BottomBar(bottomBarState.route, onClick = { route ->
@@ -52,8 +52,9 @@ fun MainFLow(radarViewModel: RadarViewModel) {
                 })
             }
         },
-        modifier = Modifier
-            .fillMaxSize()
+        modifier =
+        Modifier
+            .fillMaxSize(),
     ) { padding ->
 
         NavHost(
@@ -78,8 +79,8 @@ fun MainFLow(radarViewModel: RadarViewModel) {
                     navController.navigate(
                         RadarScreen.ChatDetailScreen(
                             userId = user.id,
-                            userName = user.username
-                        )
+                            userName = user.username,
+                        ),
                     ) {
                     }
                 })
@@ -92,7 +93,7 @@ fun MainFLow(radarViewModel: RadarViewModel) {
                 ChatDetailScreen(senderId = radarViewModel.getUserId(), receiverId = route.userId)
                 radarViewModel.updateBottomBar(
                     false,
-                    RadarScreen.ChatDetailScreen(route.userId, route.userName)
+                    RadarScreen.ChatDetailScreen(route.userId, route.userName),
                 )
                 radarViewModel.updateTopBarTitle(route.userName)
             }
@@ -102,8 +103,8 @@ fun MainFLow(radarViewModel: RadarViewModel) {
                     navController.navigate(
                         RadarScreen.ChatDetailScreen(
                             userId = user.id,
-                            userName = user.username
-                        )
+                            userName = user.username,
+                        ),
                     ) {
                     }
                 })

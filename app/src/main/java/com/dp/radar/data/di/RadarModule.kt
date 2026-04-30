@@ -6,11 +6,11 @@ import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
 import com.dp.radar.data.AndroidNetworkMonitor
 import com.dp.radar.data.NetworkMonitor
+import com.dp.radar.data.repositories.ChatRepository
 import com.dp.radar.data.repositories.DefaultLocationRepository
+import com.dp.radar.data.repositories.login.LoginRepository
 import com.dp.radar.domain.repositories.ILoginRepository
 import com.dp.radar.domain.repositories.LocationRepository
-import com.dp.radar.data.repositories.ChatRepository
-import com.dp.radar.data.repositories.login.LoginRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -23,42 +23,34 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object RadarModule {
-
     @Provides
     @Singleton
-    fun provideDataStore(@ApplicationContext context: Context): DataStore<Preferences> {
-        return PreferenceDataStoreFactory.create(
-            produceFile = { java.io.File(context.filesDir, "datastore/user_prefs.preferences_pb") }
+    fun provideDataStore(
+        @ApplicationContext context: Context,
+    ): DataStore<Preferences> =
+        PreferenceDataStoreFactory.create(
+            produceFile = { java.io.File(context.filesDir, "datastore/user_prefs.preferences_pb") },
         )
-    }
 
     @Provides
     @Singleton
-    fun providesLoginRepository(dataStore: DataStore<Preferences>): ILoginRepository {
-        return LoginRepository(dataStore)
-    }
+    fun providesLoginRepository(dataStore: DataStore<Preferences>): ILoginRepository = LoginRepository(dataStore)
 
     @Provides
-    fun provideNetworkStatus(@ApplicationContext context: Context): NetworkMonitor {
-        return AndroidNetworkMonitor(context)
-    }
+    fun provideNetworkStatus(
+        @ApplicationContext context: Context,
+    ): NetworkMonitor = AndroidNetworkMonitor(context)
 
     @Provides
     @Singleton
-    fun providesChatRepository(): ChatRepository {
-        return ChatRepository()
-    }
+    fun providesChatRepository(): ChatRepository = ChatRepository()
 
     @Provides
-    fun provideCoroutineDispatcher(): CoroutineDispatcher {
-        return Dispatchers.IO
-    }
+    fun provideCoroutineDispatcher(): CoroutineDispatcher = Dispatchers.IO
 
     @Provides
     @Singleton
     fun provideLocationRepository(
-        @ApplicationContext context: Context
-    ): LocationRepository {
-        return DefaultLocationRepository(context)
-    }
+        @ApplicationContext context: Context,
+    ): LocationRepository = DefaultLocationRepository(context)
 }
