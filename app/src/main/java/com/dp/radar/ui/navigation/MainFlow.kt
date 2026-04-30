@@ -20,6 +20,7 @@ import androidx.navigation.toRoute
 import com.dp.radar.ui.components.BottomBar
 import com.dp.radar.ui.components.RadarTopBar
 import com.dp.radar.ui.composable.ChatScreen
+import com.dp.radar.ui.composable.SettingsScreen
 import com.dp.radar.ui.composable.home.ChatDetailScreen
 import com.dp.radar.ui.composable.home.HomeScreen
 import com.dp.radar.ui.viewmodel.RadarViewModel
@@ -110,6 +111,12 @@ fun MainFLow(radarViewModel: RadarViewModel) {
                 })
                 radarViewModel.updateBottomBar(true, RadarScreen.ChatScreen)
                 radarViewModel.updateTopBarTitle("Chats")
+            }
+
+            composable<RadarScreen.SettingsScreen> {
+                SettingsScreen(onLogout = { radarViewModel.logout() })
+                radarViewModel.updateBottomBar(true, RadarScreen.SettingsScreen)
+                radarViewModel.updateTopBarTitle("Settings")
             }
         }
     }

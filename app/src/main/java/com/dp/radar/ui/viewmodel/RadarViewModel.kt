@@ -2,6 +2,7 @@ package com.dp.radar.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dp.radar.domain.UpdateOnlineStatusUseCase
 import com.dp.radar.domain.login.ClearEmailUseCase
 import com.dp.radar.domain.login.GetIsLoggedInUseCase
 import com.dp.radar.domain.login.GetUserIdUseCase
@@ -24,6 +25,7 @@ class RadarViewModel @Inject constructor(
     private val clearEmailUseCase: ClearEmailUseCase,
     getUserIdUseCase: GetUserIdUseCase,
     private val saveUserIdUseCase: SaveUserIdUseCase,
+    private val updateOnlineStatusUseCase: UpdateOnlineStatusUseCase,
 ) : ViewModel() {
 
     private val _bottomBarState = MutableStateFlow(BottomBarState(false, RadarScreen.HomeScreen))
@@ -64,6 +66,10 @@ class RadarViewModel @Inject constructor(
 
     fun logout() {
         viewModelScope.launch {
+            val currentUserId = userId.value
+            if (currentUserId != -1L) {
+                updateOnlineStatusUseCase(currentUserId, isOnline = false)
+            }
             clearEmailUseCase()
         }
     }

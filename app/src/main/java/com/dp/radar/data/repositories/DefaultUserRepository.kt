@@ -56,6 +56,14 @@ constructor(
         }
     }
 
+    override suspend fun updateOnlineStatus(userId: Long, isOnline: Boolean): ApiResult<Unit> =
+        try {
+            userDao.updateOnlineStatus(userId, isOnline)
+            ApiResult.Success(Unit)
+        } catch (e: Exception) {
+            ApiResult.Error(e.message ?: "Failed to update status")
+        }
+
     override suspend fun createUser(userRequestDto: UserRequestDto): ApiResult<User> {
         if (!networkMonitor.isOnline()) return ApiResult.Error("Network unavailable")
         return try {

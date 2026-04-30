@@ -44,7 +44,7 @@ class UserListViewModel @Inject constructor(
         viewModelScope.launch(dispatcher) {
             val currentUserId = getUserIdUseCase().first()
             observeUsersUseCase().collect { users ->
-                _state.update { it.copy(users = users.filter { u -> u.id != currentUserId }) }
+                _state.update { it.copy(users = users.filter { u -> u.id != currentUserId && u.isOnline }) }
             }
         }
     }

@@ -57,6 +57,18 @@ constructor(
         return result
     }
 
+    override suspend fun updateOnlineStatus(userId: Long, isOnline: Boolean): ApiResult<Unit> {
+        val result = suspendCancellableCoroutine { cont ->
+            usersRef.child(userId.toString()).child("isOnline").setValue(isOnline)
+                .addOnSuccessListener { cont.resume(ApiResult.Success(Unit)) }
+                .addOnFailureListener { e -> cont.resume(ApiResult.Error(e.message ?: "Failed to update status")) }
+        }
+        if (result is ApiResult.Success) {
+            userDao.updateOnlineStatus(userId, isOnline)
+        }
+        return result
+    }
+
     override suspend fun getChats(): ApiResult<List<User>> = getUsers()
 
     override suspend fun createUser(userRequestDto: UserRequestDto): ApiResult<User> {

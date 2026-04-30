@@ -11,4 +11,5 @@ interface UserRepository {
     suspend fun getUsers(): ApiResult<List<User>>
     suspend fun getChats(): ApiResult<List<User>>
     suspend fun createUser(userRequestDto: UserRequestDto): ApiResult<User>
+    suspend fun updateOnlineStatus(userId: Long, isOnline: Boolean): ApiResult<Unit>
 }

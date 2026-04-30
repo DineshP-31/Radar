@@ -17,6 +17,9 @@ abstract class UserDao {
     @Query("DELETE FROM users")
     protected abstract suspend fun deleteAll()
 
+    @Query("UPDATE users SET isOnline = :isOnline WHERE id = :id")
+    abstract suspend fun updateOnlineStatus(id: Long, isOnline: Boolean)
+
     @Transaction
     open suspend fun replaceAll(users: List<UserEntity>) {
         deleteAll()

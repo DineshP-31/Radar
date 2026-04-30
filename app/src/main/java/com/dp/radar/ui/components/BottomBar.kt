@@ -20,7 +20,7 @@ fun BottomBar(
     val items = listOf(
         BottomNavItem.Home,
         BottomNavItem.Chat,
-        // BottomNavItem.Profile
+        BottomNavItem.Settings,
     )
 
     NavigationBar {
@@ -56,5 +56,5 @@ sealed class BottomNavItem(
 ) {
     object Home : BottomNavItem(RadarScreen.HomeScreen, "Home", R.drawable.ic_home)
     object Chat : BottomNavItem(RadarScreen.ChatScreen, "Chat", R.drawable.ic_chat)
-    // object Profile : BottomNavItem(RadarScreen.SettingsScreen, "Settings", R.drawable.ic_settings)
+    object Settings : BottomNavItem(RadarScreen.SettingsScreen, "Settings", R.drawable.ic_settings)
 }
