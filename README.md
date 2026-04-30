@@ -1,6 +1,6 @@
 # Radar
 
-A real-time, location-based social messaging app for Android. Radar lets users discover nearby people, see who is online, and chat with them instantly — all powered by a custom REST API and Firebase Realtime Database.
+A real-time, location-based social messaging app for Android. Radar lets users discover nearby people, see who is online, and chat with them instantly — all powered by a custom REST API and Firebase Realtime Database, with full offline support via a local Room cache.
 
 ---
 
@@ -26,7 +26,9 @@ A real-time, location-based social messaging app for Android. Radar lets users d
 - **User Discovery** — grid view of nearby users with real-time online/offline status indicators
 - **Instant Messaging** — bidirectional chat backed by Firebase Realtime Database with sent/received message bubbles
 - **Session Persistence** — login state survives app restarts via Jetpack DataStore Preferences, exposed as a reactive `Flow<Boolean>`
-- **Skeleton Loaders & Error States** — polished loading/error/empty UI throughout
+- **Offline-First** — user list loads instantly from a local Room cache on every launch; the network refresh runs in the background and updates the UI reactively via `Flow`
+- **Pull-to-Refresh & Try Again** — swipe down or tap the button to force a fresh network fetch at any time
+- **Skeleton Loaders & Error States** — polished loading/error/empty UI throughout; errors only show when the cache is also empty
 - **Build Flavors** — swap between a REST API backend (`api`) and Firebase Realtime Database (`firebase`) at build time with zero code changes
 
 ---
@@ -41,7 +43,7 @@ Radar follows **Clean Architecture** with an **MVI pattern** on the presentation
 ├─────────────────────────────┤
 │         Domain              │  Use Cases, Domain Models, Repository Interfaces
 ├─────────────────────────────┤
-│          Data               │  Retrofit API, Firebase, DataStore Preferences, Repositories
+│          Data               │  Retrofit API, Firebase, Room DB, DataStore, Repositories
 └─────────────────────────────┘
 ```
 
@@ -57,6 +59,7 @@ User Action → Intent → ViewModel → Use Case → ApiResult → new State �
 - **Intent**: `UserListIntent.LoadUsers`, `UserListIntent.RetryLoad`
 - **State**: `UserListState(users, isLoading, error)`
 - **Side-effects** are absent by design — everything flows through state
+- The ViewModel runs two concurrent coroutines: one persistently collects `ObserveUsersUseCase` (Room → `Flow<List<User>>`), the other calls `GetUsersUseCase` to refresh from the network and controls `isLoading` / `error`
 
 Other ViewModels (`ChatViewModel`, `SignUpViewModel`, `LocationViewModel`) follow standard MVVM with `StateFlow`.
 
@@ -69,8 +72,11 @@ Pure Kotlin — no Android dependencies. Defines:
 
 ### Data
 
-- **`DefaultUserRepository`** *(api flavor)* — wraps `RadarApiService` (Retrofit), checks network availability before calls
-- **`FirebaseUserRepository`** *(firebase flavor)* — reads/writes users directly to Firebase Realtime Database under `/users/{id}` using `suspendCancellableCoroutine`
+Both `DefaultUserRepository` and `FirebaseUserRepository` implement the same offline-first contract:
+- `observeUsers(): Flow<List<User>>` — reads from Room, emits whenever the table changes
+- `getUsers(): ApiResult<List<User>>` — fetches from the network, calls `UserDao.replaceAll()` to atomically swap the cache, which triggers the Flow above
+
+Other repositories:
 - **`ChatRepository`** — wraps Firebase Realtime Database, exposes a `Flow<List<Message>>`
 - **`DefaultLocationRepository`** — wraps `FusedLocationProviderClient` via `suspendCancellableCoroutine`
 - **`LoginRepository`** — reads/writes auth state to `DataStore<Preferences>`; reads are exposed as `Flow<Boolean>` / `Flow<Long>` so all consumers react automatically to state changes
@@ -95,6 +101,7 @@ Pure Kotlin — no Android dependencies. Defines:
 | Realtime DB | Firebase Realtime Database | BOM 34.7.0 |
 | Auth | Google Sign-In / Credential Manager | 21.2.0 / 1.6.0-beta03 |
 | Location | Fused Location Provider | 21.3.0 |
+| Local Cache | Room (KSP) | 2.7.0 |
 | Local Storage | DataStore Preferences | 1.0.0 |
 | Permissions | Accompanist Permissions | 0.30.1 |
 | Testing | JUnit 4 | 4.13.2 |
@@ -111,18 +118,24 @@ app/src/
 │
 ├── main/java/com/dp/radar/             # Shared across all flavors
 │   ├── data/
-│   │   ├── datasources/remote/
-│   │   │   ├── RadarApiService.kt          # Retrofit interface — all API endpoints
-│   │   │   └── dto/
-│   │   │       ├── UserDto.kt              # API response DTO with toDomain() mapper
-│   │   │       └── LatLong.kt              # GPS coordinates {lat, lon}
+│   │   ├── datasources/
+│   │   │   ├── remote/
+│   │   │   │   ├── RadarApiService.kt          # Retrofit interface — all API endpoints
+│   │   │   │   └── dto/
+│   │   │   │       ├── UserDto.kt              # API response DTO with toDomain() mapper
+│   │   │   │       └── LatLong.kt              # GPS coordinates {lat, lon}
+│   │   │   └── db/
+│   │   │       ├── RadarDatabase.kt            # Room database (version 1)
+│   │   │       ├── UserDao.kt                  # observeAll(): Flow, replaceAll() @Transaction
+│   │   │       └── UserEntity.kt               # Room entity + toDomain() / toEntity() mappers
 │   │   ├── repositories/
-│   │   │   ├── DefaultUserRepository.kt    # UserRepository via Retrofit (api flavor)
+│   │   │   ├── DefaultUserRepository.kt    # UserRepository via Retrofit + Room cache (api flavor)
 │   │   │   ├── DefaultLocationRepository.kt# LocationRepository via FusedLocation
 │   │   │   ├── ChatRepository.kt           # Firebase Realtime Database adapter
 │   │   │   └── login/LoginRepository.kt    # Auth state (DataStore<Preferences>)
 │   │   ├── di/
 │   │   │   ├── NetworkModule.kt            # Hilt: Retrofit, OkHttp, Moshi, base URL
+│   │   │   ├── DatabaseModule.kt           # Hilt: RadarDatabase + UserDao singletons
 │   │   │   └── RadarModule.kt              # Hilt: shared bindings — DataStore, dispatcher, location
 │   │   └── NetworkMonitor.kt               # Connectivity check before API calls
 │
@@ -151,7 +164,8 @@ app/src/
 │   │   ├── SaveUserIdUseCase.kt
 │   │   ├── SaveEmailUseCase.kt
 │   │   └── ClearEmailUseCase.kt
-│   ├── GetUsersUseCase.kt              # Fetch user list → ApiResult<List<User>>
+│   ├── GetUsersUseCase.kt              # Network refresh → saves to Room → ApiResult<List<User>>
+│   ├── ObserveUsersUseCase.kt          # Room observer → Flow<List<User>> (offline-first read)
 │   ├── CreateUserUseCase.kt            # Register user with location
 │   ├── GetCurrentLocationUseCase.kt    # Request GPS fix
 │   ├── GetUserChatUseCase.kt           # Fetch chat history
@@ -263,35 +277,33 @@ Placeholder — not yet implemented.
 
 ## Data Flow
 
-### Fetch Users (Home Screen)
+### Fetch Users (Home Screen) — Offline-First
 
-The data source is determined by the build flavor — the `UserRepository` interface is the same in both cases.
+The ViewModel runs two concurrent coroutines on every launch. The `UserRepository` interface is the same regardless of flavor.
 
-**`api` flavor:**
 ```
-HomeScreen
-  └─ collectAsState(UserListState)
-       └─ UserListViewModel.handleIntent(LoadUsers)
-            └─ loadUsers() [viewModelScope + IO dispatcher]
-                 └─ GetUsersUseCase()
-                      └─ DefaultUserRepository.getUsers()
-                           └─ RadarApiService.getUsers()  [Retrofit → REST API]
-                                → ApiResult.Success(users)
-                 └─ _state.update { copy(users = filtered, isLoading = false) }
+App launch / screen open
+  │
+  ├─ Coroutine A — ObserveUsersUseCase (persistent, never cancelled)
+  │    └─ UserRepository.observeUsers(): Flow<List<User>>
+  │         └─ UserDao.observeAll()          [Room → reactive Flow]
+  │              → emits cached users immediately (even with no network)
+  │                   └─ _state.update { copy(users = filtered) }
+  │
+  └─ Coroutine B — GetUsersUseCase (one-shot per load/retry)
+       └─ _state.update { copy(isLoading = true) }
+       └─ UserRepository.getUsers()          [network call]
+            ├─ api flavor    → RadarApiService.getUsers()  [Retrofit → REST]
+            └─ firebase flavor → FirebaseDatabase /users   [ValueEventListener]
+       └─ on success: UserDao.replaceAll(users)
+            └─ Room emits updated list → Coroutine A picks it up → UI updates
+       └─ _state.update { copy(isLoading = false) }
+            └─ error only shown if Room cache is also empty
 ```
 
-**`firebase` flavor:**
-```
-HomeScreen
-  └─ collectAsState(UserListState)
-       └─ UserListViewModel.handleIntent(LoadUsers)
-            └─ loadUsers() [viewModelScope + IO dispatcher]
-                 └─ GetUsersUseCase()
-                      └─ FirebaseUserRepository.getUsers()
-                           └─ FirebaseDatabase.getReference("users")
-                                → ValueEventListener.onDataChange → ApiResult.Success(users)
-                 └─ _state.update { copy(users = filtered, isLoading = false) }
-```
+**Result:** the user list appears instantly from cache, then silently refreshes in the background. Network errors are silent when stale data is available.
+
+Pull-to-refresh and the "Try Again" button both re-trigger Coroutine B.
 
 ### Send / Receive Messages
 
@@ -428,22 +440,25 @@ fun `saveEmail causes isLoggedIn to emit true`() = runTest(testDispatcher) {
 @Test
 fun `Successful load should emit Loading then Success state`() = runTest {
     whenever(mockGetUsersUseCase.invoke()).thenReturn(ApiResult.Success(fakeUsers))
+    whenever(mockObserveUsersUseCase.invoke()).thenReturn(flowOf(fakeUsers))
     viewModel = UserListViewModel(
-        mockGetUsersUseCase, mockGetUserIdUseCase,
+        mockGetUsersUseCase, mockObserveUsersUseCase, mockGetUserIdUseCase,
         StandardTestDispatcher(testScheduler)   // shares scheduler with runTest
     )
 
     viewModel.state.test {
-        assertEquals(false, awaitItem().isLoading)  // Initial
-        assertTrue(awaitItem().isLoading)            // Loading
-        val success = awaitItem()                    // Success
+        assertEquals(false, awaitItem().isLoading)   // 1. Initial
+        assertEquals(fakeUsers, awaitItem().users)   // 2. Room cache populated
+        assertTrue(awaitItem().isLoading)            // 3. Network refresh starts
+        val success = awaitItem()                    // 4. Network refresh complete
         assertEquals(fakeUsers, success.users)
+        assertEquals(null, success.error)
         cancelAndIgnoreRemainingEvents()
     }
 }
 ```
 
-`StandardTestDispatcher(testScheduler)` is passed to the ViewModel so that `runTest`'s scheduler controls when the ViewModel's coroutines execute, giving Turbine a chance to observe each distinct `StateFlow` emission in order.
+`StandardTestDispatcher(testScheduler)` is passed to the ViewModel so that `runTest`'s scheduler controls when each coroutine executes. Because `flowOf` emits synchronously, the Room observer coroutine runs to completion before the network refresh coroutine starts, producing a predictable 4-emission sequence.
 
 ---
 
