@@ -20,14 +20,15 @@ class MainActivity : ComponentActivity() {
     val radarViewModel: RadarViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        installSplashScreen()
+        val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
+        splashScreen.setKeepOnScreenCondition { radarViewModel.isLoggedIn.value == null }
         enableEdgeToEdge()
         setContent {
             val isLoggedIn by radarViewModel.isLoggedIn.collectAsStateWithLifecycle()
 
             RadarTheme {
-                StartFlow(isLoggedIn)
+                isLoggedIn?.let { StartFlow(it) }
             }
         }
     }

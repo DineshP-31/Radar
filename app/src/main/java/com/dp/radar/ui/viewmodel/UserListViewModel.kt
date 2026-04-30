@@ -6,7 +6,6 @@ import com.dp.radar.domain.ApiResult
 import com.dp.radar.domain.GetUsersUseCase
 import com.dp.radar.domain.ObserveUsersUseCase
 import com.dp.radar.domain.login.GetUserIdUseCase
-import com.dp.radar.domain.model.Chat
 import com.dp.radar.ui.UserListIntent
 import com.dp.radar.ui.UserListState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -29,9 +28,6 @@ class UserListViewModel @Inject constructor(
 
     private val _state = MutableStateFlow(UserListState.Initial)
     val state: StateFlow<UserListState> = _state.asStateFlow()
-
-    private val _chats = MutableStateFlow<List<Chat>>(emptyList())
-    val chats: StateFlow<List<Chat>> = _chats
 
     init {
         startObservingUsers()

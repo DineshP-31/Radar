@@ -32,8 +32,8 @@ class RadarViewModel @Inject constructor(
     private val _topBarTitle = MutableStateFlow("")
     val topBarTitle = _topBarTitle.asStateFlow()
 
-    val isLoggedIn: StateFlow<Boolean> = getIsLoggedInUseCase()
-        .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+    val isLoggedIn: StateFlow<Boolean?> = getIsLoggedInUseCase()
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     val userId: StateFlow<Long> = getUserIdUseCase()
         .stateIn(viewModelScope, SharingStarted.Eagerly, -1L)
