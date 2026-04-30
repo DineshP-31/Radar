@@ -1,6 +1,9 @@
 package com.dp.radar.data.repositories
 
 import com.dp.radar.data.NetworkMonitor
+import com.dp.radar.data.datasources.db.UserDao
+import com.dp.radar.data.datasources.db.toDomain
+import com.dp.radar.data.datasources.db.toEntity
 import com.dp.radar.data.datasources.remote.dto.LatLong
 import com.dp.radar.domain.ApiResult
 import com.dp.radar.domain.model.User
@@ -10,6 +13,8 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.suspendCancellableCoroutine
 import javax.inject.Inject
 import kotlin.coroutines.resume
@@ -17,18 +22,19 @@ import kotlin.coroutines.resume
 class FirebaseUserRepository @Inject constructor(
     private val database: FirebaseDatabase,
     private val networkMonitor: NetworkMonitor,
+    private val userDao: UserDao,
 ) : UserRepository {
 
     private val usersRef get() = database.getReference("users")
 
-    override suspend fun getUsers(userId: Long): ApiResult<List<User>> {
-        if (!networkMonitor.isOnline()) return ApiResult.Error("Network unavailable")
-        return getUsers()
-    }
+    override fun observeUsers(): Flow<List<User>> =
+        userDao.observeAll().map { entities -> entities.map { it.toDomain() } }
+
+    override suspend fun getUsers(userId: Long): ApiResult<List<User>> = getUsers()
 
     override suspend fun getUsers(): ApiResult<List<User>> {
         if (!networkMonitor.isOnline()) return ApiResult.Error("Network unavailable")
-        return suspendCancellableCoroutine { cont ->
+        val result = suspendCancellableCoroutine { cont ->
             val listener = object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     val users = snapshot.children.mapNotNull { it.toUser() }
@@ -42,12 +48,13 @@ class FirebaseUserRepository @Inject constructor(
             usersRef.addListenerForSingleValueEvent(listener)
             cont.invokeOnCancellation { usersRef.removeEventListener(listener) }
         }
+        if (result is ApiResult.Success) {
+            userDao.replaceAll(result.data.map { it.toEntity() })
+        }
+        return result
     }
 
-    override suspend fun getChats(): ApiResult<List<User>> {
-        if (!networkMonitor.isOnline()) return ApiResult.Error("Network unavailable")
-        return getUsers()
-    }
+    override suspend fun getChats(): ApiResult<List<User>> = getUsers()
 
     override suspend fun createUser(userRequestDto: UserRequestDto): ApiResult<User> {
         if (!networkMonitor.isOnline()) return ApiResult.Error("Network unavailable")

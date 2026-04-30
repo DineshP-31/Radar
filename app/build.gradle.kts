@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.hilt)
     alias(libs.plugins.detekt)
+    alias(libs.plugins.ksp)
     kotlin("kapt")
     id("kotlin-parcelize")
     id("com.google.gms.google-services")
@@ -114,6 +115,10 @@ dependencies {
     kapt(libs.hilt.compiler)
     implementation(libs.hilt.android)
     implementation(libs.datastore.preferences)
+    // Room
+    implementation(libs.room.runtime)
+    implementation(libs.room.ktx)
+    ksp(libs.room.compiler)
     implementation(libs.hilt.compiler)
     // Networking
     implementation(libs.bundles.networking)

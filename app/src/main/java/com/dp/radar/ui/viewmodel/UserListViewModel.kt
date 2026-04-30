@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dp.radar.domain.ApiResult
 import com.dp.radar.domain.GetUsersUseCase
+import com.dp.radar.domain.ObserveUsersUseCase
 import com.dp.radar.domain.login.GetUserIdUseCase
 import com.dp.radar.domain.model.Chat
 import com.dp.radar.ui.UserListIntent
@@ -21,6 +22,7 @@ import javax.inject.Inject
 @HiltViewModel
 class UserListViewModel @Inject constructor(
     private val getUsersUseCase: GetUsersUseCase,
+    private val observeUsersUseCase: ObserveUsersUseCase,
     private val getUserIdUseCase: GetUserIdUseCase,
     private val dispatcher: CoroutineDispatcher,
 ) : ViewModel() {
@@ -32,37 +34,35 @@ class UserListViewModel @Inject constructor(
     val chats: StateFlow<List<Chat>> = _chats
 
     init {
-        handleIntent(UserListIntent.LoadUsers)
+        startObservingUsers()
+        refreshFromNetwork()
     }
 
     fun handleIntent(intent: UserListIntent) {
         when (intent) {
-            UserListIntent.LoadUsers, UserListIntent.RetryLoad -> loadUsers()
+            UserListIntent.LoadUsers, UserListIntent.RetryLoad -> refreshFromNetwork()
         }
     }
 
-    private fun loadUsers() {
+    private fun startObservingUsers() {
         viewModelScope.launch(dispatcher) {
-            _state.value = _state.value.copy(isLoading = true, error = null)
-            when (val result = getUsersUseCase()) {
-                is ApiResult.Success -> {
-                    val currentUserId = getUserIdUseCase().first()
-                    val data = result.data.filter {
-                        it.id != currentUserId
-                    }
-                    _state.update {
-                        it.copy(users = data, isLoading = false, error = null)
-                    }
-                }
+            val currentUserId = getUserIdUseCase().first()
+            observeUsersUseCase().collect { users ->
+                _state.update { it.copy(users = users.filter { u -> u.id != currentUserId }) }
+            }
+        }
+    }
 
-                is ApiResult.Error -> {
-                    _state.update {
-                        it.copy(
-                            users = emptyList(),
-                            isLoading = false,
-                            error = result.message
-                        )
-                    }
+    private fun refreshFromNetwork() {
+        viewModelScope.launch(dispatcher) {
+            _state.update { it.copy(isLoading = true, error = null) }
+            when (val result = getUsersUseCase()) {
+                is ApiResult.Success -> _state.update { it.copy(isLoading = false, error = null) }
+                is ApiResult.Error -> _state.update { state ->
+                    state.copy(
+                        isLoading = false,
+                        error = if (state.users.isEmpty()) result.message else null,
+                    )
                 }
             }
         }
