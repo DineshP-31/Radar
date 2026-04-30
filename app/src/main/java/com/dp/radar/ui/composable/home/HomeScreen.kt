@@ -23,6 +23,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -55,20 +56,21 @@ fun HomeScreen(
 ) {
     val state by viewModel.state.collectAsState()
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
+    val onRetry = { viewModel.handleIntent(UserListIntent.RetryLoad) }
+
+    PullToRefreshBox(
+        isRefreshing = state.isLoading,
+        onRefresh = onRetry,
+        modifier = Modifier.fillMaxSize()
     ) {
         when {
             state.isLoading -> LoadingIndicatorGrid()
 
-            state.error != null -> ErrorView(state.error!!) {
-                viewModel.handleIntent(UserListIntent.RetryLoad)
-            }
+            state.error != null -> ErrorView(state.error!!, onRetry)
 
             state.users.isNotEmpty() -> UserListView(users = state.users, onItemClicked)
 
-            else -> EmptyView()
+            else -> EmptyView(onRetry)
         }
     }
     BackHandler()
@@ -122,17 +124,27 @@ fun ErrorView(errorMessage: String, onRetry: () -> Unit) {
 }
 
 @Composable
-fun EmptyView() {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+fun EmptyView(onRetry: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "No users found.\nTry refreshing later.",
+            text = "No users found.",
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center
         )
+        Spacer(Modifier.height(16.dp))
+        Button(
+            onClick = onRetry,
+            contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp)
+        ) {
+            Text("Try Again")
+        }
     }
 }
 
