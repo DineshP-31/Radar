@@ -1,5 +1,6 @@
 package com.dp.radar.data.repositories
 
+import com.dp.radar.data.NetworkMonitor
 import com.dp.radar.data.datasources.remote.dto.LatLong
 import com.dp.radar.domain.ApiResult
 import com.dp.radar.domain.model.User
@@ -14,15 +15,20 @@ import javax.inject.Inject
 import kotlin.coroutines.resume
 
 class FirebaseUserRepository @Inject constructor(
-    private val database: FirebaseDatabase
+    private val database: FirebaseDatabase,
+    private val networkMonitor: NetworkMonitor,
 ) : UserRepository {
 
     private val usersRef get() = database.getReference("users")
 
-    override suspend fun getUsers(userId: Long): ApiResult<List<User>> = getUsers()
+    override suspend fun getUsers(userId: Long): ApiResult<List<User>> {
+        if (!networkMonitor.isOnline()) return ApiResult.Error("Network unavailable")
+        return getUsers()
+    }
 
-    override suspend fun getUsers(): ApiResult<List<User>> =
-        suspendCancellableCoroutine { cont ->
+    override suspend fun getUsers(): ApiResult<List<User>> {
+        if (!networkMonitor.isOnline()) return ApiResult.Error("Network unavailable")
+        return suspendCancellableCoroutine { cont ->
             val listener = object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     val users = snapshot.children.mapNotNull { it.toUser() }
@@ -36,11 +42,16 @@ class FirebaseUserRepository @Inject constructor(
             usersRef.addListenerForSingleValueEvent(listener)
             cont.invokeOnCancellation { usersRef.removeEventListener(listener) }
         }
+    }
 
-    override suspend fun getChats(): ApiResult<List<User>> = getUsers()
+    override suspend fun getChats(): ApiResult<List<User>> {
+        if (!networkMonitor.isOnline()) return ApiResult.Error("Network unavailable")
+        return getUsers()
+    }
 
-    override suspend fun createUser(userRequestDto: UserRequestDto): ApiResult<User> =
-        suspendCancellableCoroutine { cont ->
+    override suspend fun createUser(userRequestDto: UserRequestDto): ApiResult<User> {
+        if (!networkMonitor.isOnline()) return ApiResult.Error("Network unavailable")
+        return suspendCancellableCoroutine { cont ->
             val id = System.currentTimeMillis()
             val user = User(
                 id = id,
@@ -56,6 +67,7 @@ class FirebaseUserRepository @Inject constructor(
                     cont.resume(ApiResult.Error(e.message ?: "Failed to create user"))
                 }
         }
+    }
 
     private fun DataSnapshot.toUser(): User? = runCatching {
         User(
