@@ -2,6 +2,7 @@ package com.dp.radar.data.di
 
 import android.content.Context
 import androidx.room.Room
+import com.dp.radar.data.datasources.db.PendingMessageDao
 import com.dp.radar.data.datasources.db.RadarDatabase
 import com.dp.radar.data.datasources.db.UserDao
 import dagger.Module
@@ -27,4 +28,8 @@ object DatabaseModule {
     @Provides
     @Singleton
     fun provideUserDao(database: RadarDatabase): UserDao = database.userDao()
+
+    @Provides
+    @Singleton
+    fun providePendingMessageDao(database: RadarDatabase): PendingMessageDao = database.pendingMessageDao()
 }

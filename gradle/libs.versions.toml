@@ -35,6 +35,8 @@ playServicesLocation = "21.3.0"
 accompanist-permissions = "0.30.1"
 room = "2.7.0"
 ksp = "2.2.21-2.0.5"
+workmanager = "2.10.0"
+hilt-ext = "1.2.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -87,6 +89,9 @@ accompanist-permissions = { group = "com.google.accompanist", name = "accompanis
 room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
 room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
+workmanager = { module = "androidx.work:work-runtime-ktx", version.ref = "workmanager" }
+hilt-work = { module = "androidx.hilt:hilt-work", version.ref = "hilt-ext" }
+hilt-androidx-compiler = { module = "androidx.hilt:hilt-compiler", version.ref = "hilt-ext" }
 
 [bundles]
 # Grouping common network dependencies

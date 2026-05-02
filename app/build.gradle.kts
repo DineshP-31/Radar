@@ -82,6 +82,10 @@ kotlin {
     }
 }
 
+kapt {
+    correctErrorTypes = true
+}
+
 detekt {
     config.setFrom(files("$rootDir/config/detekt/detekt.yml"))
     buildUponDefaultConfig = true
@@ -119,6 +123,8 @@ dependencies {
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
     ksp(libs.room.compiler)
+    // WorkManager
+    implementation(libs.workmanager)
     implementation(libs.hilt.compiler)
     // Networking
     implementation(libs.bundles.networking)

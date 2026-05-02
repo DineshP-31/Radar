@@ -223,12 +223,24 @@ private fun ChatBubble(chat: Chat) {
                     fontSize = 16.sp
                 )
                 Spacer(modifier = Modifier.height(2.dp))
-                Text(
-                    text = formatTime(chat.timestamp),
-                    color = if (isSent) Color.White.copy(alpha = 0.7f) else Color.Gray,
-                    fontSize = 12.sp,
-                    modifier = Modifier.align(Alignment.End)
-                )
+                Row(
+                    modifier = Modifier.align(Alignment.End),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    Text(
+                        text = formatTime(chat.timestamp),
+                        color = if (isSent) Color.White.copy(alpha = 0.7f) else Color.Gray,
+                        fontSize = 12.sp,
+                    )
+                    if (chat.isPending) {
+                        Text(
+                            text = "⏱",
+                            color = Color.White.copy(alpha = 0.7f),
+                            fontSize = 10.sp,
+                        )
+                    }
+                }
             }
         }
     }

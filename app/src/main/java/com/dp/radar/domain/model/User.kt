@@ -28,6 +28,7 @@ data class Chat(
     val message: String,
     val timestamp: Long = System.currentTimeMillis(),
     val messageType: MessageType = MessageType.RECEIVED,
+    val isPending: Boolean = false,
 )
 
 @Serializable

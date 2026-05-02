@@ -4,11 +4,14 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
+import androidx.work.WorkManager
 import com.dp.radar.data.AndroidNetworkMonitor
 import com.dp.radar.data.NetworkMonitor
+import com.dp.radar.data.datasources.db.PendingMessageDao
 import com.dp.radar.data.repositories.ChatRepository
 import com.dp.radar.data.repositories.DefaultLocationRepository
 import com.dp.radar.data.repositories.login.LoginRepository
+import com.dp.radar.domain.repositories.IChatRepository
 import com.dp.radar.domain.repositories.ILoginRepository
 import com.dp.radar.domain.repositories.LocationRepository
 import dagger.Module
@@ -34,7 +37,8 @@ object RadarModule {
 
     @Provides
     @Singleton
-    fun providesLoginRepository(dataStore: DataStore<Preferences>): ILoginRepository = LoginRepository(dataStore)
+    fun providesLoginRepository(dataStore: DataStore<Preferences>): ILoginRepository =
+        LoginRepository(dataStore)
 
     @Provides
     fun provideNetworkStatus(
@@ -43,7 +47,17 @@ object RadarModule {
 
     @Provides
     @Singleton
-    fun providesChatRepository(): ChatRepository = ChatRepository()
+    fun provideWorkManager(
+        @ApplicationContext context: Context,
+    ): WorkManager = WorkManager.getInstance(context)
+
+    @Provides
+    @Singleton
+    fun providesChatRepository(
+        networkMonitor: NetworkMonitor,
+        pendingMessageDao: PendingMessageDao,
+        workManager: WorkManager,
+    ): IChatRepository = ChatRepository(networkMonitor, pendingMessageDao, workManager)
 
     @Provides
     fun provideCoroutineDispatcher(): CoroutineDispatcher = Dispatchers.IO
