@@ -9,6 +9,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.CoroutineDispatcher
 import javax.inject.Singleton
 
 @Module
@@ -24,5 +25,6 @@ object UserRepositoryModule {
         database: FirebaseDatabase,
         networkMonitor: NetworkMonitor,
         userDao: UserDao,
-    ): UserRepository = FirebaseUserRepository(database, networkMonitor, userDao)
+        ioDispatcher: CoroutineDispatcher,
+    ): UserRepository = FirebaseUserRepository(database, networkMonitor, userDao, ioDispatcher)
 }

@@ -8,7 +8,6 @@ import com.dp.radar.domain.CreateUserUseCase
 import com.dp.radar.domain.model.UserRequestDto
 import com.dp.radar.ui.SignUpState
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,14 +18,13 @@ import javax.inject.Inject
 @HiltViewModel
 class SignUpViewModel @Inject constructor(
     private val createUserUseCase: CreateUserUseCase,
-    private val dispatcher: CoroutineDispatcher,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(SignUpState.Initial)
     val state: StateFlow<SignUpState> = _state.asStateFlow()
 
     fun createUser(userName: String, email: String, latLong: LatLong) {
-        viewModelScope.launch(dispatcher) {
+        viewModelScope.launch {
             _state.value = _state.value.copy(isLoading = true, error = null)
             when (
                 val result = createUserUseCase(

@@ -10,7 +10,6 @@ import com.dp.radar.domain.model.User
 import com.dp.radar.utils.MainDispatcherRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
@@ -49,7 +48,6 @@ class UserListViewModelTest {
             mockGetUsersUseCase,
             mockObserveUsersUseCase,
             mockGetUserIdUseCase,
-            StandardTestDispatcher(testScheduler),
         )
 
         viewModel.state.test {
@@ -83,7 +81,6 @@ class UserListViewModelTest {
             mockGetUsersUseCase,
             mockObserveUsersUseCase,
             mockGetUserIdUseCase,
-            StandardTestDispatcher(testScheduler),
         )
 
         viewModel.state.test {

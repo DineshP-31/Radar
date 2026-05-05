@@ -9,7 +9,6 @@ import com.dp.radar.domain.login.GetUserIdUseCase
 import com.dp.radar.ui.UserListIntent
 import com.dp.radar.ui.UserListState
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -23,7 +22,6 @@ class UserListViewModel @Inject constructor(
     private val getUsersUseCase: GetUsersUseCase,
     private val observeUsersUseCase: ObserveUsersUseCase,
     private val getUserIdUseCase: GetUserIdUseCase,
-    private val dispatcher: CoroutineDispatcher,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(UserListState.Initial)
@@ -41,7 +39,7 @@ class UserListViewModel @Inject constructor(
     }
 
     private fun startObservingUsers() {
-        viewModelScope.launch(dispatcher) {
+        viewModelScope.launch {
             val currentUserId = getUserIdUseCase().first()
             observeUsersUseCase().collect { users ->
                 _state.update { it.copy(users = users.filter { u -> u.id != currentUserId && u.isOnline }) }
@@ -50,7 +48,7 @@ class UserListViewModel @Inject constructor(
     }
 
     private fun refreshFromNetwork() {
-        viewModelScope.launch(dispatcher) {
+        viewModelScope.launch {
             _state.update { it.copy(isLoading = true, error = null) }
             when (val result = getUsersUseCase()) {
                 is ApiResult.Success -> _state.update { it.copy(isLoading = false, error = null) }
